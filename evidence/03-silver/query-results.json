@@ -1,0 +1,61 @@
+{
+  "results": [
+    {
+      "name": "row_counts_and_uniqueness",
+      "statement_id": "01f1b60d-daf2-1a30-8fd7-73311e6b3242",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "row_count", "duplicate_keys"],
+      "rows": [
+        ["attendance_events", 299990, 0],
+        ["engagement_events", 249990, 0],
+        ["enrollments", 60000, 0],
+        ["financial_events", 39995, 0],
+        ["model_feature_snapshots", 40000, 0],
+        ["referential_quarantine", 0, 0],
+        ["student_daily_snapshots", 20000, 0],
+        ["student_outcomes", 40000, 0],
+        ["student_protected_audit", 20000, 0],
+        ["students", 20000, 0],
+        ["training_labels", 40000, 0]
+      ]
+    },
+    {
+      "name": "temporal_integrity_and_completeness",
+      "statement_id": "01f1b60d-ed9a-1e93-8e12-1922c4ff466e",
+      "state": "SUCCEEDED",
+      "columns": ["feature_rows", "future_feature_rows", "null_attendance_rate", "null_missed_assignments", "null_lms_recency", "null_financial_hold", "null_gpa", "invalid_label_cutoffs", "labels_without_features"],
+      "rows": [[40000, 0, 0, 0, 0, 0, 0, 0, 0]]
+    },
+    {
+      "name": "label_balance",
+      "statement_id": "01f1b60d-f63a-1e82-9c0f-9565978bc3c9",
+      "state": "SUCCEEDED",
+      "columns": ["label_term_code", "labels", "stopouts", "stopout_rate", "feature_as_of", "label_observed_at"],
+      "rows": [
+        ["2026FA", 20000, 2224, 0.1112, "2026-09-06T23:59:59.000Z", "2026-09-07T00:00:00.000Z"],
+        ["2026SP", 20000, 2100, 0.105, "2026-01-25T23:59:59.000Z", "2026-01-26T00:00:00.000Z"]
+      ]
+    },
+    {
+      "name": "prohibited_model_columns",
+      "statement_id": "01f1b60e-05c2-1449-ab93-82ec48f2417b",
+      "state": "SUCCEEDED",
+      "columns": ["column_name"],
+      "rows": []
+    },
+    {
+      "name": "representative_feature_snapshots",
+      "statement_id": "01f1b60e-0f0a-1e52-9e0f-5ed671c57332",
+      "state": "SUCCEEDED",
+      "columns": ["student_id", "feature_as_of", "program_code", "attendance_rate_28d", "missed_assignments_28d", "days_since_lms_activity", "financial_hold_flag", "current_balance_band", "credits_attempted_current", "credits_completed_prior", "attempted_credit_trend", "cumulative_gpa", "withdrawal_count_prior", "support_interactions_90d", "max_feature_event_at"],
+      "rows": [
+        ["STU-000042", "2026-01-25T23:59:59.000Z", "HEALTH", 0.0, 0, 31, false, "NONE", 12, 0, 0, 2.07, 0, 0, "2025-12-25T14:00:00.000Z"],
+        ["STU-000042", "2026-09-06T23:59:59.000Z", "HEALTH", 0.0, 0, 255, false, "HIGH", 12, 9, 0, 2.07, 1, 1, "2026-07-13T14:00:00.000Z"],
+        ["STU-000124", "2026-01-25T23:59:59.000Z", "ARTS", 0.0, 0, 999, false, "NONE", 17, 0, 0, 2.64, 0, 0, "2025-09-08T00:00:00.000Z"],
+        ["STU-000124", "2026-09-06T23:59:59.000Z", "ARTS", 0.0, 0, 13, true, "LOW", 17, 17, 0, 2.64, 0, 0, "2026-08-24T14:00:00.000Z"],
+        ["STU-000185", "2026-01-25T23:59:59.000Z", "BUS", 0.0, 0, 999, false, "LOW", 15, 0, 0, 2.98, 0, 0, "2025-11-28T00:00:00.000Z"],
+        ["STU-000185", "2026-09-06T23:59:59.000Z", "BUS", 0.8, 0, 22, false, "HIGH", 15, 15, 0, 2.98, 0, 0, "2026-09-04T09:00:00.000Z"]
+      ]
+    }
+  ]
+}

@@ -10,6 +10,8 @@ resources:
             path: ../src/pipelines/bronze_rules.py
         - file:
             path: ../src/pipelines/bronze.py
+        - file:
+            path: ../src/pipelines/silver.py
       serverless: true
       continuous: false
       photon: true

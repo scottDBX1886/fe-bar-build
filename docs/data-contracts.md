@@ -78,6 +78,32 @@ All five child datasets reference `students.student_id`.
 - `academic_level`
 - `residency_status`
 
+## Silver Point-in-Time Contract
+
+Silver publishes deduplicated domain tables, an isolated
+`student_protected_audit` table, `training_labels`, operational
+`student_daily_snapshots`, and label-aligned `model_feature_snapshots`.
+
+For training, `feature_as_of` is 23:59:59 on the day before the next-term
+census date. Labels are stored only in `training_labels`; model feature rows do
+not contain the label, outcome status, protected audit attributes, or the
+synthetic incident-cohort marker.
+
+| Feature | Point-in-time definition |
+|---|---|
+| `attendance_rate_28d` | Mean of attendance flags strictly within the preceding 28 days and no later than `feature_as_of` |
+| `missed_assignments_28d` | Count of missed assignment events in the same preceding 28-day window |
+| `days_since_lms_activity` | Calendar days since the latest LMS login known at the cutoff; `999` means no prior login |
+| `support_interactions_90d` | Support interactions strictly within the preceding 90 days |
+| `financial_hold_flag`, `current_balance_band` | Latest financial state at or before the cutoff |
+| `credits_attempted_current`, `cumulative_gpa` | Latest enrollment state at or before the cutoff |
+| `credits_completed_prior`, `withdrawal_count_prior` | Totals from enrollment terms preceding the current term |
+| `attempted_credit_trend` | Current attempted credits minus the immediately preceding term |
+
+`max_feature_event_at` is retained as a leakage-audit column, and the pipeline
+fails if it exceeds `feature_as_of`. Missing activity receives explicit neutral
+defaults instead of silently disappearing from the training population.
+
 Identifiers, labels, post-cutoff events, advisor identity, and protected audit attributes are excluded.
 
 ## Incremental Layout

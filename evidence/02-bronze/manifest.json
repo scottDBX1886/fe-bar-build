@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "task": "02-bronze",
+  "captured_at": "2026-09-21T22:28:55Z",
+  "profile": "fe-bar",
+  "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
+  "resources": {
+    "catalog": "serverless_stable_febar_scottj_catalog",
+    "schema": "student_retention_bronze",
+    "warehouse_id": "1dd756b73d046482",
+    "pipeline_id": "b22af6b5-ff4b-47b3-a2b4-0d3945986ce7",
+    "initial_update_id": "9a7a50ca-2f93-417d-a229-918e7735cc53",
+    "replay_update_id": "b00a6a7d-e565-49f3-80a6-9b49602608f0"
+  },
+  "commands": [
+    "databricks bundle validate --strict -t dev --profile fe-bar",
+    "databricks bundle deploy -t dev --profile fe-bar",
+    "databricks bundle run student_retention_pipeline -t dev --refresh-all --no-wait -o json --profile fe-bar",
+    "databricks pipelines get-update b22af6b5-ff4b-47b3-a2b4-0d3945986ce7 9a7a50ca-2f93-417d-a229-918e7735cc53 -o json --profile fe-bar",
+    "databricks pipelines get-update b22af6b5-ff4b-47b3-a2b4-0d3945986ce7 b00a6a7d-e565-49f3-80a6-9b49602608f0 -o json --profile fe-bar"
+  ],
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "run-output.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

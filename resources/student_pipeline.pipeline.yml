@@ -6,8 +6,10 @@ resources:
       target: ${var.schema_prefix}_bronze
       root_path: ../src/pipelines
       libraries:
-        - glob:
-            include: ../src/pipelines/**
+        - file:
+            path: ../src/pipelines/bronze_rules.py
+        - file:
+            path: ../src/pipelines/bronze.py
       serverless: true
       continuous: false
       photon: true

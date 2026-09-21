@@ -1,0 +1,19 @@
+{
+  "pipeline_id": "b22af6b5-ff4b-47b3-a2b4-0d3945986ce7",
+  "updates": [
+    {
+      "purpose": "initial incremental ingestion",
+      "update_id": "9a7a50ca-2f93-417d-a229-918e7735cc53",
+      "cause": "API_CALL",
+      "state": "COMPLETED",
+      "full_refresh": false
+    },
+    {
+      "purpose": "no-new-files idempotency replay",
+      "update_id": "b00a6a7d-e565-49f3-80a6-9b49602608f0",
+      "cause": "API_CALL",
+      "state": "COMPLETED",
+      "full_refresh": false
+    }
+  ]
+}

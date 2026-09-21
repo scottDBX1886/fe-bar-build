@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "name": "counts_before_replay",
+      "statement_id": "01f1b60b-1a2b-1baa-a2ff-7f6b976d7f94",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "layer", "row_count"],
+      "rows": [
+        ["attendance_events", "accepted", 299990],
+        ["attendance_events", "quarantine", 10],
+        ["engagement_events", "accepted", 249990],
+        ["engagement_events", "quarantine", 10],
+        ["enrollments", "accepted", 60000],
+        ["enrollments", "quarantine", 0],
+        ["financial_events", "accepted", 39995],
+        ["financial_events", "quarantine", 5],
+        ["student_outcomes", "accepted", 40000],
+        ["student_outcomes", "quarantine", 0],
+        ["students", "accepted", 20000],
+        ["students", "quarantine", 0]
+      ]
+    },
+    {
+      "name": "quarantine_reasons_and_metadata",
+      "statement_id": "01f1b60b-29ad-13c1-8e22-ff82eea10e38",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "violation_reason", "row_count", "missing_source_path", "missing_ingested_at"],
+      "rows": [
+        ["attendance_events", "MISSING_STUDENT_ID", 10, 0, 0],
+        ["engagement_events", "MISSING_STUDENT_ID", 10, 0, 0],
+        ["financial_events", "MISSING_STUDENT_ID", 5, 0, 0]
+      ]
+    },
+    {
+      "name": "counts_after_replay",
+      "statement_id": "01f1b60b-675b-17aa-bde6-de68794c0f7d",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "layer", "row_count"],
+      "rows": [
+        ["attendance_events", "accepted", 299990],
+        ["attendance_events", "quarantine", 10],
+        ["engagement_events", "accepted", 249990],
+        ["engagement_events", "quarantine", 10],
+        ["enrollments", "accepted", 60000],
+        ["enrollments", "quarantine", 0],
+        ["financial_events", "accepted", 39995],
+        ["financial_events", "quarantine", 5],
+        ["student_outcomes", "accepted", 40000],
+        ["student_outcomes", "quarantine", 0],
+        ["students", "accepted", 20000],
+        ["students", "quarantine", 0]
+      ]
+    },
+    {
+      "name": "flow_and_expectation_metrics",
+      "statement_id": "01f1b60b-d00c-1b7c-b2ed-881f53256dd6",
+      "state": "SUCCEEDED",
+      "columns": ["flow_name", "output_rows", "expectation_name", "passed_records", "failed_records"],
+      "rows": [
+        ["attendance_events", 299990, "attendance_events_safe_state", 299990, 0],
+        ["attendance_events_quarantine", 10, null, null, null],
+        ["engagement_events", 249990, "engagement_events_safe_state", 249990, 0],
+        ["engagement_events_quarantine", 10, null, null, null],
+        ["enrollments", 60000, "enrollments_safe_state", 60000, 0],
+        ["enrollments_quarantine", 0, null, null, null],
+        ["financial_events", 39995, "financial_events_safe_state", 39995, 0],
+        ["financial_events_quarantine", 5, null, null, null],
+        ["student_outcomes", 40000, "student_outcomes_safe_state", 40000, 0],
+        ["student_outcomes_quarantine", 0, null, null, null],
+        ["students", 20000, "students_safe_state", 20000, 0],
+        ["students_quarantine", 0, null, null, null]
+      ]
+    }
+  ]
+}

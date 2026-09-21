@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "task": "04-ml",
+  "captured_at": "2026-09-21T23:37:03Z",
+  "profile": "fe-bar",
+  "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
+  "resources": {
+    "catalog": "serverless_stable_febar_scottj_catalog",
+    "ml_schema": "student_retention_ml",
+    "gold_schema": "student_retention_gold",
+    "job_id": "666694306037627",
+    "job_run_id": "659847868525694",
+    "task_run_id": "674366714450139",
+    "mlflow_run_id": "f640e5c41b7e4aadb34d809d9b5363cf",
+    "registered_model": "student_stopout_risk",
+    "model_version": "2",
+    "model_alias": "prod",
+    "warehouse_id": "1dd756b73d046482"
+  },
+  "commands": [
+    "databricks bundle validate --strict -t dev --profile fe-bar",
+    "databricks bundle deploy -t dev --profile fe-bar",
+    "databricks bundle run student_retention_daily -t dev --only train_and_score_stopout_risk --no-wait -o json --profile fe-bar",
+    "databricks jobs get-run 659847868525694 -o json --profile fe-bar",
+    "databricks jobs get-run-output 674366714450139 -o json --profile fe-bar"
+  ],
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "run-output.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

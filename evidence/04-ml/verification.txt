@@ -1,0 +1,56 @@
+Task 5 verification record
+Captured: 2026-09-21T23:37:03Z
+Profile: fe-bar
+
+TDD POLICY TESTS
+Initial command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit/test_ml_metrics.py -v
+Initial result: FAIL (src.ml module absent, expected RED)
+Final result: PASS
+Summary: 13 passed
+
+SCORING CONTRACT TESTS
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/integration/test_scoring_contract.py -v
+Result: PASS
+Summary: 2 passed
+
+FULL UNIT SUITE
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit -q
+Result: PASS
+Summary: 62 passed
+
+PYTHON COMPILATION
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m py_compile src/ml/policy.py src/ml/train.py src/ml/score.py
+Result: PASS
+
+BUNDLE VALIDATION AND DEPLOYMENT
+Command: databricks bundle validate --strict -t dev --profile fe-bar
+Result: PASS (Validation OK)
+Command: databricks bundle deploy -t dev --profile fe-bar
+Result: PASS
+
+REMOTE SERVERLESS JOB
+Job run: 659847868525694
+Task run: 674366714450139
+Result: SUCCESS
+Selected family: logistic_regression
+UC model version and alias: 2 @prod
+Rows scored: 20,000
+
+MODEL POLICY
+Chronological split: PASS
+Prohibited feature exclusion: PASS
+PR-AUC threshold: PASS (0.9669)
+Top-10% recall threshold: PASS (0.8961)
+Calibration threshold: PASS (0.0216)
+Protected-attribute post-prediction audit: PASS
+
+GOLD SCORE HISTORY
+Immutable key uniqueness: PASS (20,000 / 20,000)
+Score completeness and range: PASS
+Risk tier completeness: PASS
+Leading factor completeness: PASS
+Change Data Feed enabled during table creation: PASS
+
+EVIDENCE PACKAGE
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -c "from pathlib import Path; from src.evidence.package import validate_evidence_package; validate_evidence_package(Path('evidence/04-ml'))"
+Result: PASS

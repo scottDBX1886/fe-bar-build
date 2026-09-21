@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "name": "history_integrity",
+      "statement_id": "01f1b615-46fb-19d0-9650-eb72a778afe7",
+      "state": "SUCCEEDED",
+      "columns": ["row_count", "unique_keys", "null_scores", "missing_factors", "null_tiers", "tier_count", "min_score", "max_score", "model_versions"],
+      "rows": [[20000, 20000, 0, 0, 0, 3, 4.184149071446099e-32, 0.9999929444166079, 1]]
+    },
+    {
+      "name": "tier_distribution",
+      "statement_id": "01f1b615-4dbc-1ffa-af64-c3fad5eb8853",
+      "state": "SUCCEEDED",
+      "columns": ["model_version", "risk_tier", "students", "avg_score"],
+      "rows": [
+        ["2", "high", 2336, 0.949218],
+        ["2", "low", 17336, 0.004846],
+        ["2", "medium", 328, 0.444272]
+      ]
+    },
+    {
+      "name": "sanitized_representative_predictions",
+      "statement_id": "01f1b615-5340-1b2b-9427-97840c7bc4eb",
+      "state": "SUCCEEDED",
+      "columns": ["synthetic_student_hash", "feature_as_of", "model_version", "risk_score", "risk_tier", "leading_factors"],
+      "rows": [
+        ["cf233d63d43c", "2026-09-21T23:59:59.000Z", "2", 0.999993, "high", ["numeric__cumulative_gpa", "numeric__support_interactions_90d", "numeric__financial_hold_flag"]],
+        ["decdd5d3ea93", "2026-09-21T23:59:59.000Z", "2", 0.99999, "high", ["numeric__cumulative_gpa", "numeric__financial_hold_flag", "numeric__support_interactions_90d"]],
+        ["b6fcf1fba06e", "2026-09-21T23:59:59.000Z", "2", 0.999989, "high", ["numeric__cumulative_gpa", "numeric__financial_hold_flag", "numeric__support_interactions_90d"]]
+      ]
+    },
+    {
+      "name": "gold_table_properties",
+      "statement_id": "01f1b615-79a2-143b-8e1e-b5933d24d130",
+      "state": "SUCCEEDED",
+      "columns": ["format", "name", "properties", "tableFeatures"],
+      "rows": [["delta", "serverless_stable_febar_scottj_catalog.student_retention_gold.student_risk_score_history", {"delta.enableChangeDataFeed": "true"}, ["appendOnly", "changeDataFeed", "deletionVectors", "invariants"]]]
+    }
+  ]
+}

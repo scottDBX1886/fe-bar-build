@@ -29,7 +29,32 @@ resources:
           pipeline_task:
             pipeline_id: ${resources.pipelines.student_retention_pipeline.id}
             full_refresh: false
+        - task_key: train_and_score_stopout_risk
+          depends_on:
+            - task_key: run_student_pipeline
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/ml/train.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --experiment-path
+              - ${workspace.root_path}/student-stopout-risk
+              - --bundle-root
+              - ${workspace.root_path}/files
+              - --seed
+              - ${var.retention_seed}
       environments:
         - environment_key: default
           spec:
             client: "4"
+        - environment_key: ml
+          spec:
+            client: "4"
+            dependencies:
+              - mlflow>=3.1,<4
+              - scikit-learn>=1.5,<2
+              - xgboost>=2.1,<4
+              - shap>=0.46,<1

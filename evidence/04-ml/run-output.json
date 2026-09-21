@@ -1,0 +1,28 @@
+{
+  "job_run_id": "659847868525694",
+  "task_run_id": "674366714450139",
+  "state": "SUCCESS",
+  "execution_duration_ms": 115000,
+  "output": {
+    "run_id": "f640e5c41b7e4aadb34d809d9b5363cf",
+    "model_name": "serverless_stable_febar_scottj_catalog.student_retention_ml.student_stopout_risk",
+    "model_version": "2",
+    "model_alias": "prod",
+    "selected_family": "logistic_regression",
+    "pr_auc": 0.9669197862353848,
+    "top_k_recall": 0.8961330935251799,
+    "top_k_precision": 0.9965,
+    "calibration_error": 0.02159229248914287,
+    "rows_scored": 20000,
+    "fairness_rate_gaps": {
+      "synthetic_gender": {"false_positive_rate": 0.008619, "false_negative_rate": 0.036412},
+      "synthetic_first_generation": {"false_positive_rate": 0.000552, "false_negative_rate": 0.021782},
+      "synthetic_race_ethnicity": {"false_positive_rate": 0.006336, "false_negative_rate": 0.019648}
+    },
+    "comparison": {
+      "business_rule": {"pr_auc": 0.5313312655118024, "top_k_recall": 0.5377697841726619, "top_k_precision": 0.598, "calibration_error": 0.302956375},
+      "logistic_regression": {"pr_auc": 0.9669197862353848, "top_k_recall": 0.8961330935251799, "top_k_precision": 0.9965, "calibration_error": 0.02159229248914287},
+      "xgboost": {"pr_auc": 0.9588995019034265, "top_k_recall": 0.8992805755395683, "top_k_precision": 1.0, "calibration_error": 0.007138745874934372}
+    }
+  }
+}

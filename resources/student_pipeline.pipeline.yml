@@ -1,0 +1,19 @@
+resources:
+  pipelines:
+    student_retention_pipeline:
+      name: ${bundle.target}-student-retention-pipeline
+      catalog: ${var.catalog}
+      target: ${var.schema_prefix}_bronze
+      root_path: ../src/pipelines
+      libraries:
+        - glob:
+            include: ../src/pipelines/**
+      serverless: true
+      continuous: false
+      photon: true
+      channel: current
+      configuration:
+        retention.catalog: ${var.catalog}
+        retention.schema_prefix: ${var.schema_prefix}
+        retention.warehouse_id: ${var.warehouse_id}
+        retention.seed: ${var.retention_seed}

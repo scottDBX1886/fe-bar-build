@@ -1,0 +1,44 @@
+bundle:
+  name: student-retention
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for the solution
+  schema_prefix:
+    description: Prefix for the Bronze, Silver, Gold, ML, and CDC schemas
+  warehouse_id:
+    description: SQL warehouse used by analytics and Genie
+  retention_seed:
+    description: Deterministic synthetic data seed
+    default: 20260921
+  lakebase_branch:
+    description: Lakebase branch resource path; populated in Task 8
+    default: ""
+  lakebase_database:
+    description: Lakebase database resource path; populated in Task 8
+    default: ""
+  genie_space_id:
+    description: Curated Genie Agent ID; populated in Task 10
+    default: ""
+  foundation_model_endpoint:
+    description: Foundation Model endpoint selected in Task 7
+    default: ""
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: serverless_stable_febar_scottj_catalog
+      schema_prefix: student_retention
+      warehouse_id: 1dd756b73d046482
+
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}

@@ -1,0 +1,9 @@
+resources:
+  jobs:
+    student_retention_daily:
+      name: ${bundle.target}-student-retention-daily
+      tasks:
+        - task_key: run_student_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.student_retention_pipeline.id}
+            full_refresh: false

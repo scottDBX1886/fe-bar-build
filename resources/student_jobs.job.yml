@@ -2,8 +2,34 @@ resources:
   jobs:
     student_retention_daily:
       name: ${bundle.target}-student-retention-daily
+      parameters:
+        - name: run_date
+          default: "2026-09-21"
+        - name: bootstrap
+          default: "true"
       tasks:
+        - task_key: generate_synthetic_data
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/synthetic/generate.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --run-date
+              - "{{job.parameters.run_date}}"
+              - --seed
+              - ${var.retention_seed}
+              - --bootstrap
+              - "{{job.parameters.bootstrap}}"
         - task_key: run_student_pipeline
+          depends_on:
+            - task_key: generate_synthetic_data
           pipeline_task:
             pipeline_id: ${resources.pipelines.student_retention_pipeline.id}
             full_refresh: false
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"

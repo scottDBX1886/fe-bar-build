@@ -1,0 +1,84 @@
+{
+  "results": [
+    {
+      "name": "row_counts",
+      "statement_id": "01f1b5e9-93ec-19b1-88b6-0c2dc887c349",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "rows"],
+      "rows": [
+        ["attendance_events", 300000],
+        ["engagement_events", 250000],
+        ["enrollments", 60000],
+        ["financial_events", 40000],
+        ["student_outcomes", 40000],
+        ["students", 20000]
+      ]
+    },
+    {
+      "name": "program_distribution",
+      "statement_id": "01f1b5e9-93f2-1a85-addb-5e28a4d16311",
+      "state": "SUCCEEDED",
+      "columns": ["program_code", "student_count", "avg_net_tuition"],
+      "rows": [
+        ["BUS", 6032, 9069.66],
+        ["ARTS", 4987, 8993.60],
+        ["STEM", 4017, 8857.35],
+        ["HEALTH", 2918, 8968.97],
+        ["EDU", 2046, 8899.53]
+      ]
+    },
+    {
+      "name": "incident_attendance",
+      "statement_id": "01f1b5e9-93e6-1cad-9283-ff81fca2b62f",
+      "state": "SUCCEEDED",
+      "columns": ["story_segment", "attendance_rate", "event_count"],
+      "rows": [["BASELINE", 0.886, 299740], ["INCIDENT_PATTERN", 0.564, 250]]
+    },
+    {
+      "name": "outcome_rates",
+      "statement_id": "01f1b5e9-93eb-1398-9e3a-7f862999d680",
+      "state": "SUCCEEDED",
+      "columns": ["incident_cohort", "outcome_count", "stopout_rate"],
+      "rows": [[false, 39400, 0.105], [true, 600, 0.307]]
+    },
+    {
+      "name": "referential_integrity",
+      "statement_id": "01f1b5e9-b3df-13c9-a0e4-01d4e688a085",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "orphan_rows"],
+      "rows": [
+        ["attendance_events", 0],
+        ["engagement_events", 0],
+        ["enrollments", 0],
+        ["financial_events", 0],
+        ["student_outcomes", 0]
+      ]
+    },
+    {
+      "name": "checksums_before_rerun",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "checksum"],
+      "rows": [
+        ["attendance_events", "-7302530383460132773522"],
+        ["engagement_events", "-1870411590126981066431"],
+        ["enrollments", "-1469215451743508725569"],
+        ["financial_events", "-428521798841114519334"],
+        ["student_outcomes", "1159512271447505876593"],
+        ["students", "-1631310212048987621906"]
+      ]
+    },
+    {
+      "name": "checksums_after_rerun",
+      "state": "SUCCEEDED",
+      "columns": ["dataset", "checksum"],
+      "rows": [
+        ["attendance_events", "-7302530383460132773522"],
+        ["engagement_events", "-1870411590126981066431"],
+        ["enrollments", "-1469215451743508725569"],
+        ["financial_events", "-428521798841114519334"],
+        ["student_outcomes", "1159512271447505876593"],
+        ["students", "-1631310212048987621906"]
+      ]
+    }
+  ]
+}

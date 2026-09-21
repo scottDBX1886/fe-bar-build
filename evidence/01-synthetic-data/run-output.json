@@ -1,0 +1,33 @@
+{
+  "runs": [
+    {
+      "purpose": "initial bootstrap",
+      "job_id": 666694306037627,
+      "job_run_id": 309550092725814,
+      "task_run_id": 328056588598522,
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "run_date": "2026-09-21",
+      "bootstrap": true,
+      "execution_duration_ms": 42000,
+      "rows": {
+        "attendance_events": 300000,
+        "engagement_events": 250000,
+        "enrollments": 60000,
+        "financial_events": 40000,
+        "student_outcomes": 40000,
+        "students": 20000
+      }
+    },
+    {
+      "purpose": "deterministic rerun",
+      "job_id": 666694306037627,
+      "job_run_id": 845407514884426,
+      "task_run_id": 1060441874029780,
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "run_date": "2026-09-21",
+      "bootstrap": true
+    }
+  ]
+}

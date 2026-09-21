@@ -1,0 +1,37 @@
+Task 2 verification record
+Captured: 2026-09-21T18:19:32Z
+Profile: fe-bar
+
+LOCAL TESTS
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit -v
+Result: PASS
+Summary: 33 passed in 0.48s
+
+PYTHON COMPILATION
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m py_compile src/synthetic/contracts.py src/synthetic/generate.py
+Result: PASS
+
+BUNDLE VALIDATION
+Command: databricks bundle validate --strict -t dev --profile fe-bar
+Result: PASS
+Summary: Validation OK
+
+REMOTE GENERATION
+Initial job run: 309550092725814
+Initial generator task: 328056588598522
+Result: TERMINATED / SUCCESS
+Deterministic rerun: 845407514884426
+Deterministic rerun task: 1060441874029780
+Result: TERMINATED / SUCCESS
+
+DATA VALIDATION
+Row-count query: PASS
+Nonuniform distribution query: PASS
+Incident-pattern query: PASS
+Outcome-imbalance query: PASS
+Referential integrity: PASS (zero unintended orphans)
+Deterministic checksum comparison: PASS (all six datasets identical)
+
+EVIDENCE PACKAGE
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -c "from pathlib import Path; from src.evidence.package import validate_evidence_package; validate_evidence_package(Path('evidence/01-synthetic-data'))"
+Result: PASS

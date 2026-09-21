@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "task": "01-synthetic-data",
+  "captured_at": "2026-09-21T18:19:32Z",
+  "profile": "fe-bar",
+  "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
+  "resources": {
+    "catalog": "serverless_stable_febar_scottj_catalog",
+    "schema": "student_retention_bronze",
+    "volume": "raw_data",
+    "job_id": 666694306037627,
+    "initial_job_run_id": 309550092725814,
+    "initial_task_run_id": 328056588598522,
+    "deterministic_rerun_id": 845407514884426,
+    "deterministic_rerun_task_id": 1060441874029780,
+    "warehouse_id": "1dd756b73d046482"
+  },
+  "commands": [
+    "databricks bundle validate --strict -t dev --profile fe-bar",
+    "databricks bundle deploy -t dev --profile fe-bar",
+    "databricks bundle run student_retention_daily -t dev --only generate_synthetic_data --params run_date=2026-09-21,bootstrap=true --no-wait -o json --profile fe-bar",
+    "databricks jobs get-run 309550092725814 -o json --profile fe-bar",
+    "databricks jobs get-run-output 328056588598522 -o json --profile fe-bar",
+    "databricks jobs get-run 845407514884426 -o json --profile fe-bar"
+  ],
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "run-output.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

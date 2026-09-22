@@ -1,0 +1,18 @@
+{
+  "history_counts_at_capture": [
+    {"source_table": "interventions", "cdc_rows": 5},
+    {"source_table": "intervention_events", "cdc_rows": 7}
+  ],
+  "round_trip": [
+    {
+      "student_id": "STU-TASK8-ROUNDTRIP",
+      "status": "open",
+      "version": 1,
+      "_pg_change_type": "insert",
+      "event_type": "created",
+      "idempotency_key": "task8-roundtrip-create-001",
+      "result_version": 1
+    }
+  ],
+  "type_mapping_note": "Postgres UUID values are represented as BINARY in Unity Catalog CDC history."
+}

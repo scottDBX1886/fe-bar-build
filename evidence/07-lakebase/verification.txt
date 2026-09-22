@@ -1,0 +1,21 @@
+TDD red:
+- Local sync contract collection failed because scripts.configure_lakebase_sync did not exist.
+- Live transaction test failed because schema student_retention_app did not exist.
+
+Live green:
+- RUN_LAKEBASE_INTEGRATION=1 pytest -q tests/integration/test_lakebase_transactions.py
+- Result: 4 passed in 29.15s.
+
+Final local verification:
+- pytest -q: 111 passed, 4 skipped in 3.11s.
+- python3 -m compileall -q src scripts tests: exit 0.
+- databricks bundle validate --strict -t dev --profile fe-bar: Validation OK.
+
+Remote CDC verification:
+- Both intervention tables report CDF_STATE_STREAMING.
+- Sanitized intervention STU-TASK8-ROUNDTRIP and its created event arrived in UC history.
+
+Known blocker:
+- create-catalog student_retention_lakebase failed because the selected identity lacks
+  CREATE CATALOG on metastore metastore_aws_us_west_2.
+- UC-to-Lakebase serving sync and overwrite-protection refresh proof remain pending.

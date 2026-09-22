@@ -37,6 +37,8 @@ targets:
       catalog: serverless_stable_febar_scottj_catalog
       schema_prefix: student_retention
       warehouse_id: 1dd756b73d046482
+      lakebase_branch: projects/student-retention/branches/production
+      lakebase_database: projects/student-retention/branches/production/databases/databricks-postgres
 
   prod:
     mode: production

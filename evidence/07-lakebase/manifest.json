@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "task": "07-lakebase",
+  "captured_at": "2026-09-22T19:00:00Z",
+  "profile": "fe-bar",
+  "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
+  "resources": {
+    "project": "projects/student-retention",
+    "branch": "projects/student-retention/branches/production",
+    "endpoint": "projects/student-retention/branches/production/endpoints/primary",
+    "database": "projects/student-retention/branches/production/databases/databricks-postgres",
+    "postgres_write_schema": "student_retention_app",
+    "uc_cdc_schema": "serverless_stable_febar_scottj_catalog.student_retention_cdc"
+  },
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "run-output.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

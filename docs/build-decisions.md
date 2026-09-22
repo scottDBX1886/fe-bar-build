@@ -11,7 +11,10 @@ This document records explicit environment and scope choices for the proactive s
 | Unity Catalog catalog | `serverless_stable_febar_scottj_catalog` | Dedicated managed workspace catalog explicitly approved for this build. |
 | Schema prefix | `student_retention` | Produces distinct Bronze, Silver, Gold, ML, and CDC namespaces. |
 | SQL warehouse | `Serverless Starter Warehouse` (`1dd756b73d046482`) | The available SQL warehouse in the selected workspace. |
-| Lakebase | Create `student-retention` during Task 8 | No Lakebase projects currently exist; creation is deferred until its schema and ownership are ready. |
+| Lakebase project | `projects/student-retention` | Dedicated Postgres 17 Autoscaling project created for Task 8. |
+| Lakebase branch | `projects/student-retention/branches/production` | Default read-write branch approved for this single-builder demo. |
+| Lakebase database | `projects/student-retention/branches/production/databases/databricks-postgres` | Default `databricks_postgres` database required by Lakehouse Sync. |
+| Lakebase endpoint | `projects/student-retention/branches/production/endpoints/primary` | Primary read-write endpoint used for schema and transaction verification. |
 
 ## Derived Unity Catalog Namespaces
 
@@ -41,9 +44,11 @@ This document records explicit environment and scope choices for the proactive s
 
 ## Deferred Resource IDs
 
-The Lakebase project, branch, database, and Genie Agent identifiers will be
-recorded here only after their task-specific discovery and explicit approval
-gates.
+The Genie Agent identifier will be recorded after Task 10 discovery. Lakebase
+resource paths are recorded above. Registration of `student_retention_lakebase`
+as a Unity Catalog catalog is pending metastore `CREATE CATALOG`; the selected
+profile can manage the Lakebase project but does not hold that metastore-level
+privilege.
 
 ## Governance Identity Gate
 

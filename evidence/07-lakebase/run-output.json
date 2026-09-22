@@ -1,0 +1,25 @@
+{
+  "project_status": "READY",
+  "postgres_version": 17,
+  "live_transaction_tests": {
+    "status": "passed",
+    "tests": 4
+  },
+  "cdf": {
+    "config_id": "student_retention_interventions",
+    "interventions_state": "CDF_STATE_STREAMING",
+    "intervention_events_state": "CDF_STATE_STREAMING"
+  },
+  "round_trip": {
+    "student_id": "STU-TASK8-ROUNDTRIP",
+    "intervention_status": "open",
+    "version": 1,
+    "event_type": "created",
+    "result_version": 1
+  },
+  "serving_sync": {
+    "status": "blocked",
+    "reason": "Selected identity lacks CREATE CATALOG on the metastore",
+    "pending_catalog": "student_retention_lakebase"
+  }
+}

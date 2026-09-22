@@ -370,19 +370,19 @@ Save sanitized inputs, outputs, scorer results, and failures to `evidence/06-gen
 - Consumes: User-approved Lakebase project/branch/database and governed Gold serving tables.
 - Produces: Read-only synchronized serving tables, app-owned intervention tables, proven transaction semantics, and UC CDC history for the application layer built later.
 
-- [ ] **Step 1: Confirm Lakebase resources before mutation**
+- [x] **Step 1: Confirm Lakebase resources before mutation**
 
 List projects, branches, endpoints, and databases using the selected profile. Let the user confirm reuse or creation and the exact branch/database. Use a fresh app-owned schema so the deployed app service principal owns its write tables.
 
-- [ ] **Step 2: Write failing transaction-contract tests**
+- [x] **Step 2: Write failing transaction-contract tests**
 
 Test create, update, close, duplicate idempotency key, stale version conflict, event append, rollback, and database rejection of any mutation targeting synchronized serving tables.
 
-- [ ] **Step 3: Implement the Postgres schema**
+- [x] **Step 3: Implement the Postgres schema**
 
 Create `interventions` with an integer version and audit timestamps, and immutable `intervention_events` with a unique idempotency key. Add foreign-key and check constraints, practical indexes, and `REPLICA IDENTITY FULL` for Lakehouse Sync.
 
-- [ ] **Step 4: Implement and prove transactional SQL operations**
+- [x] **Step 4: Implement and prove transactional SQL operations**
 
 Each state-transition test must update `interventions` with `WHERE version = expected_version` and append the corresponding event in the same transaction. Define the result contract later used by the application repository: conflict when no matching version is updated and the prior successful result for a repeated idempotency key.
 

@@ -25,7 +25,7 @@ variables:
     default: ""
   foundation_model_endpoint:
     description: Foundation Model endpoint selected in Task 7
-    default: ""
+    default: "databricks-glm-5-3"
 
 targets:
   dev:

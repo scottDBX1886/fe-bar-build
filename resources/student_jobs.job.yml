@@ -82,6 +82,36 @@ resources:
               - ${workspace.root_path}/files
               - --mode
               - core-policies
+        - task_key: generate_advisor_briefings
+          depends_on:
+            - task_key: apply_gold_core_policies
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/genai/generate.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --cohort-limit
+              - "50"
+              - --endpoint
+              - ${var.foundation_model_endpoint}
+        - task_key: evaluate_advisor_briefings
+          depends_on:
+            - task_key: generate_advisor_briefings
+          environment_key: ml
+          spark_python_task:
+            python_file: ../src/genai/evaluate.py
+            parameters:
+              - --endpoint
+              - ${var.foundation_model_endpoint}
+              - --experiment-path
+              - ${workspace.root_path}/advisor-briefing-evaluation
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
       environments:
         - environment_key: default
           spec:
@@ -90,7 +120,7 @@ resources:
           spec:
             client: "4"
             dependencies:
-              - mlflow>=3.1,<4
+              - mlflow>=3.9,<3.10
               - scikit-learn>=1.5,<2
               - xgboost>=2.1,<4
               - shap>=0.46,<1

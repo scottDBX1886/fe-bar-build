@@ -1,0 +1,10 @@
+{
+  "capture_type": "local_bundle_validation",
+  "remote_generation_run": "not_run",
+  "remote_mlflow_evaluation": "not_run",
+  "bundle_validation": {
+    "status": "OK",
+    "target": "dev",
+    "bundle": "student-retention"
+  }
+}

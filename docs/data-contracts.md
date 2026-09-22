@@ -115,3 +115,27 @@ Raw records are written as Parquet to:
 ```
 
 The bootstrap run creates the master population and historical terms. Later triggered runs append one new synthetic day of activity. A small tagged group of malformed records is written to dedicated input rows so Bronze quarantine behavior can be demonstrated without changing valid business aggregates.
+
+## Advisor Briefing Contract
+
+Advisor generation reads only
+`<catalog>.<schema_prefix>_gold.student_detail`. The prompt includes the
+governed risk score and tier, allowlisted model contributing-factor IDs, and
+only these factual signal IDs when populated: `attendance_rate_28d`,
+`missed_assignments_28d`, `days_since_lms_activity`, `financial_hold_flag`,
+and `cumulative_gpa`. It does not receive protected audit attributes, raw
+unrestricted notes, labels, or any other source fields.
+
+Responses must be a strict JSON object containing `briefing`,
+`suggested_action`, `citations`, `unsupported_claims`, `prompt_version`, and
+`model_id`. Every briefing sentence has an inline citation to an allowlisted
+fact ID; accepted responses have no unsupported claims. Diagnostic,
+disciplinary, protected-trait, and retention-causality content is rejected.
+
+`<catalog>.<schema_prefix>_gold.advisor_summaries` is versioned by prompt
+version and idempotent summary key. It records model ID, citations, generation
+and evaluation status, timestamp, and visible error text. Generated summaries
+remain `evaluation_status = 'pending'` and are not publishable until the named
+MLflow gates pass; a failed gate is visibly marked `failed`. It contains no
+risk score and does not modify `student_risk_score_history`; endpoint or
+validation failure produces a `generation_status = 'failed'` record instead.

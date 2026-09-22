@@ -1,0 +1,21 @@
+RED (expected missing contract):
+pytest tests/unit/test_genai_contract.py -v
+Result: collection failed with ModuleNotFoundError: No module named 'src.genai'.
+
+GREEN:
+pytest tests/unit/test_genai_contract.py -v
+Result: 12 passed in 1.83s.
+
+Regression verification:
+pytest -v
+Result: 92 passed in 1.98s.
+
+Compilation:
+python -m py_compile $(find src -name '*.py' -type f | sort)
+Result: exit 0.
+
+Bundle validation:
+DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
+Result: Validation OK.
+
+Remote generation and evaluation: not run in this capture; no remote claims are made.

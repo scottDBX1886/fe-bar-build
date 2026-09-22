@@ -29,11 +29,21 @@ This document records explicit environment and scope choices for the proactive s
 - ML risk prediction plus grounded GenAI advisor assistance.
 - Embedded Genie Agent inside the Databricks App.
 - Native executive analytics in the app; no separate AI/BI dashboard in the initial scope.
+- Advisor briefing endpoint: `databricks-glm-5-3`, selected after a live
+  compatibility check accepted `temperature=0.1` and returned JSON in an
+  optional `json` code fence. The endpoint does not reliably support native
+  `response_format`; generation therefore enforces prompt-level JSON plus
+  local fence stripping, schema validation, and bounded retries.
+- Advisor briefing generation is limited to 50 scored students per daily run,
+  uses `max_tokens=1200` to accommodate reasoning tokens, and reads only the
+  governed `student_retention_gold.student_detail` surface.
 - UC-to-Lakebase serving tables are read-only; interventions use separate Lakebase-owned tables.
 
 ## Deferred Resource IDs
 
-The Lakebase project, branch, database, Genie Agent, and Foundation Model endpoint identifiers will be recorded here only after their task-specific discovery and explicit approval gates.
+The Lakebase project, branch, database, and Genie Agent identifiers will be
+recorded here only after their task-specific discovery and explicit approval
+gates.
 
 ## Governance Identity Gate
 

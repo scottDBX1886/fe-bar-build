@@ -1,0 +1,3 @@
+-- No SQL was run for this local implementation verification.
+-- Controller remote validation must query advisor_summaries for generation and
+-- evaluation statuses, citation coverage, unsupported claims, and failures.

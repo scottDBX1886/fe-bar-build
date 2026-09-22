@@ -46,6 +46,42 @@ resources:
               - ${workspace.root_path}/files
               - --seed
               - ${var.retention_seed}
+        - task_key: bootstrap_gold_governance
+          depends_on:
+            - task_key: train_and_score_stopout_risk
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/governance/apply.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --bundle-root
+              - ${workspace.root_path}/files
+              - --mode
+              - bootstrap
+        - task_key: run_gold_pipeline
+          depends_on:
+            - task_key: bootstrap_gold_governance
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.student_retention_gold_pipeline.id}
+            full_refresh: false
+        - task_key: apply_gold_core_policies
+          depends_on:
+            - task_key: run_gold_pipeline
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/governance/apply.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --bundle-root
+              - ${workspace.root_path}/files
+              - --mode
+              - core-policies
       environments:
         - environment_key: default
           spec:

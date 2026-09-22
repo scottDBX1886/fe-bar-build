@@ -296,23 +296,23 @@ Save model comparisons, selection rationale, registered version, fairness audit,
 - Consumes: Silver student/features/outcomes and Gold risk-score history.
 - Produces: Advisor caseload, student detail, executive metrics, tuition exposure, and curated Genie views with enforced access boundaries.
 
-- [ ] **Step 1: Write failing metric tests**
+- [x] **Step 1: Write failing metric tests**
 
 Test retention rate, at-risk count, top-K caseload priority, intervention coverage, time-to-first-intervention, follow-up completion, and tuition exposure. Define tuition exposure as sum of synthetic next-term net tuition for currently elevated-risk students and label it as an estimate.
 
-- [ ] **Step 2: Implement focused Gold materialized views**
+- [x] **Step 2: Implement focused Gold materialized views**
 
 Create separate views for `advisor_caseload`, `student_detail`, `executive_retention_metrics`, `risk_trends`, and `genie_retention`. Retain program, cohort, advisor, term, score date, risk tier, and intervention status dimensions required by downstream consumers.
 
-- [ ] **Step 3: Implement governance bootstrap and policies**
+- [x] **Step 3: Implement governance bootstrap and policies**
 
 Create schemas, managed Volume, comments, and table properties idempotently. Create restricted audit views for protected attributes. Apply row-level enforcement for advisor assignment and aggregate-only executive access using approved workspace groups recorded in `docs/build-decisions.md`; do not substitute UI-only filtering for data policy.
 
-- [ ] **Step 4: Verify grants and policy behavior**
+- [x] **Step 4: Verify grants and policy behavior**
 
 Test allowed and denied queries for app service principal, advisor identity, and executive identity. Query lineage to prove source-to-Gold dependencies. Verify that protected attributes are absent from advisor, executive, and Genie surfaces.
 
-- [ ] **Step 5: Capture evidence, walk through, and commit**
+- [x] **Step 5: Capture evidence, walk through, and commit**
 
 Save metric query results, `SHOW GRANTS`, policy tests, and lineage rows to `evidence/05-gold-governance/`. Commit with `feat: publish governed retention data products`.
 

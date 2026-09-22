@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "task": "05-gold-governance",
+  "captured_at": "2026-09-22T13:59:38Z",
+  "profile": "fe-bar",
+  "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
+  "resources": {
+    "catalog": "serverless_stable_febar_scottj_catalog",
+    "gold_schema": "student_retention_gold",
+    "warehouse_id": "1dd756b73d046482",
+    "gold_pipeline_id": "90801e09-c6fd-4156-9515-7cbd514f081d",
+    "gold_update_id": "ebf2700a-8dee-45be-bc3b-ccd7897981c5",
+    "bootstrap_job_run_id": "393655731129214",
+    "bootstrap_task_run_id": "698774189659106",
+    "policy_job_run_id": "615125720216698",
+    "policy_task_run_id": "75671304452727"
+  },
+  "deferred_principals": [
+    "advisor account group",
+    "executive account group",
+    "fairness-audit account group",
+    "Databricks App service principal"
+  ],
+  "commands": [
+    "databricks bundle validate --strict -t dev --profile fe-bar",
+    "databricks bundle deploy -t dev --profile fe-bar",
+    "databricks bundle run student_retention_daily -t dev --only bootstrap_gold_governance --no-wait -o json --profile fe-bar",
+    "databricks bundle run student_retention_gold_pipeline -t dev --no-wait -o json --profile fe-bar",
+    "databricks pipelines get-update 90801e09-c6fd-4156-9515-7cbd514f081d ebf2700a-8dee-45be-bc3b-ccd7897981c5 -o json --profile fe-bar",
+    "databricks bundle run student_retention_daily -t dev --only apply_gold_core_policies --no-wait -o json --profile fe-bar"
+  ],
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "run-output.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

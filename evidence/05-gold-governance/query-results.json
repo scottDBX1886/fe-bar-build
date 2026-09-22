@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "name": "fail_closed_without_entitlement",
+      "statement_id": "01f1b686-b601-1522-b8fa-2d800d495154",
+      "state": "SUCCEEDED",
+      "columns": ["advisor_rows_without_entitlement", "detail_rows_without_entitlement", "genie_rows_without_entitlement", "executive_aggregate_rows"],
+      "rows": [[0, 0, 0, 15]]
+    },
+    {
+      "name": "builder_entitlement",
+      "statement_id": "01f1b68c-4851-1e8c-9ae5-a031aba2718a",
+      "state": "SUCCEEDED",
+      "columns": ["num_affected_rows", "num_updated_rows", "num_deleted_rows", "num_inserted_rows"],
+      "rows": [[1, 0, 0, 1]]
+    },
+    {
+      "name": "gold_counts_and_metrics",
+      "statement_id": "01f1b68d-b454-1179-83c3-f39205956b2a",
+      "state": "SUCCEEDED",
+      "columns": ["advisor_caseload_rows", "student_detail_rows", "executive_metric_rows", "risk_trend_rows", "genie_rows", "students", "at_risk_students", "retention_rate", "estimated_tuition_exposure", "tuition_is_estimate", "intervention_coverage"],
+      "rows": [[2664, 20000, 15, 15, 20000, 20000, 2664, 0.8888, 24096114.71, true, 0.0]]
+    },
+    {
+      "name": "protected_columns_on_routine_surfaces",
+      "statement_id": "01f1b68c-f7f9-1d48-9574-aada57716005",
+      "state": "SUCCEEDED",
+      "columns": ["table_name", "column_name"],
+      "rows": []
+    },
+    {
+      "name": "gold_schema_grants_sanitized",
+      "statement_id": "01f1b68d-07ac-15ba-b473-91808f7d34c2",
+      "state": "SUCCEEDED",
+      "columns": ["principal", "action_type", "object_type", "object_key"],
+      "rows": [
+        ["existing_catalog_service_principal", "ALL PRIVILEGES", "CATALOG", "serverless_stable_febar_scottj_catalog"],
+        ["existing_catalog_service_principal", "MANAGE", "CATALOG", "serverless_stable_febar_scottj_catalog"],
+        ["build_owner", "ALL PRIVILEGES", "CATALOG", "serverless_stable_febar_scottj_catalog"],
+        ["build_owner", "MANAGE", "CATALOG", "serverless_stable_febar_scottj_catalog"]
+      ]
+    },
+    {
+      "name": "unity_catalog_lineage",
+      "statement_id": "01f1b68d-1390-1d41-bd79-28064fbe692a",
+      "state": "SUCCEEDED",
+      "summary": {
+        "rows": 20,
+        "targets": 5,
+        "sources_per_target": ["student_risk_score_history", "enrollments", "student_daily_snapshots", "student_outcomes"]
+      }
+    },
+    {
+      "name": "advisor_row_filter_metadata",
+      "source": "databricks tables get",
+      "state": "SUCCEEDED",
+      "table_type": "MATERIALIZED_VIEW",
+      "row_filter": {
+        "function_name": "serverless_stable_febar_scottj_catalog.student_retention_gold.advisor_row_filter",
+        "input_column_names": ["advisor_id"]
+      }
+    }
+  ]
+}

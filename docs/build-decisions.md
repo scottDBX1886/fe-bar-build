@@ -34,3 +34,25 @@ This document records explicit environment and scope choices for the proactive s
 ## Deferred Resource IDs
 
 The Lakebase project, branch, database, Genie Agent, and Foundation Model endpoint identifiers will be recorded here only after their task-specific discovery and explicit approval gates.
+
+## Governance Identity Gate
+
+Task 6 publishes fail-closed row filtering through
+`student_retention_gold.advisor_entitlements`. An identity receives no
+student-level rows until it has an explicit advisor assignment; `*` is reserved
+for controlled build verification and application administration.
+
+The following production principals are intentionally not guessed:
+
+| Principal | Status | Activation point |
+|---|---|---|
+| Advisor account group | Awaiting explicit selection | Before advisor user acceptance testing |
+| Executive account group | Awaiting explicit selection | Before executive user acceptance testing |
+| Fairness-audit account group | Awaiting explicit selection | Before restricted audit access is granted |
+| Databricks App service principal | Not created yet | Task 11 app deployment |
+
+`src/governance/policies.sql` contains least-privilege grants and explicit
+revocations for these principals. They must be rendered only after the exact
+names are approved. For Task 6 verification, the build owner
+`scott.johnson@databricks.com` has a synthetic wildcard advisor entitlement;
+the zero-row state was captured before that entitlement was inserted.

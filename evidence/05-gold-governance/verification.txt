@@ -1,0 +1,74 @@
+Task 6 verification record
+Captured: 2026-09-22T13:59:38Z
+Profile: fe-bar
+
+TDD METRIC TESTS
+Initial command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit/test_gold_metrics.py -v
+Initial result: FAIL (gold metric module absent, expected RED)
+Final result: PASS
+Summary: 7 passed
+
+TDD GOVERNANCE CONTRACT TESTS
+Initial command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/integration/test_governance.py -v
+Initial result: FAIL (Gold and governance files absent, expected RED)
+Final result: PASS
+Summary: 6 passed
+
+TDD SQL RUNNER TESTS
+Initial command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit/test_governance_sql.py -v
+Initial result: FAIL (governance apply module absent, expected RED)
+Final result: PASS
+Summary: 3 passed
+
+RUNTIME REGRESSIONS
+timestamp_diff API regression test: PASS
+PERSISTED retention semantic regression test: PASS
+
+FULL UNIT SUITE
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m pytest tests/unit -q
+Result: PASS
+Summary: 72 passed
+
+PYTHON COMPILATION
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -m py_compile src/governance/apply.py src/pipelines/gold.py src/pipelines/gold_metrics.py
+Result: PASS
+
+BUNDLE
+Command: databricks bundle validate --strict -t dev --profile fe-bar
+Result: PASS (Validation OK)
+Command: databricks bundle deploy -t dev --profile fe-bar
+Result: PASS
+
+GOVERNANCE BOOTSTRAP
+Job run: 393655731129214
+Task run: 698774189659106
+Result: SUCCESS
+Statements: 10
+
+GOLD PIPELINE
+Pipeline: 90801e09-c6fd-4156-9515-7cbd514f081d
+Update: ebf2700a-8dee-45be-bc3b-ccd7897981c5
+Result: COMPLETED
+Full refresh: false
+
+CORE POLICIES
+Job run: 615125720216698
+Task run: 75671304452727
+Result: SUCCESS
+Restricted audit view: PASS
+Advisor row-filter attachment: PASS
+Fail-closed zero-row behavior: PASS
+Explicit-entitlement allowed behavior: PASS
+Protected-field exclusion: PASS
+Source-to-Gold lineage: PASS (20 relationships)
+
+PRINCIPAL ACCEPTANCE TESTS
+Advisor group: DEFERRED (not selected)
+Executive group: DEFERRED (not selected)
+Fairness-audit group: DEFERRED (not selected)
+App service principal: DEFERRED (created in Task 11)
+No broad substitute grants were applied.
+
+EVIDENCE PACKAGE
+Command: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -c "from pathlib import Path; from src.evidence.package import validate_evidence_package; validate_evidence_package(Path('evidence/05-gold-governance'))"
+Result: PASS

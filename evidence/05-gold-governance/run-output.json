@@ -1,0 +1,26 @@
+{
+  "bootstrap": {
+    "job_run_id": "393655731129214",
+    "task_run_id": "698774189659106",
+    "state": "SUCCESS",
+    "mode": "bootstrap",
+    "statements_executed": 10
+  },
+  "gold_pipeline": {
+    "pipeline_id": "90801e09-c6fd-4156-9515-7cbd514f081d",
+    "update_id": "ebf2700a-8dee-45be-bc3b-ccd7897981c5",
+    "state": "COMPLETED",
+    "full_refresh": false
+  },
+  "core_policies": {
+    "job_run_id": "615125720216698",
+    "task_run_id": "75671304452727",
+    "state": "SUCCESS",
+    "mode": "core-policies",
+    "statements_executed": 1
+  },
+  "principal_grants": {
+    "state": "DEFERRED",
+    "reason": "Exact account groups are not approved and the app service principal does not yet exist."
+  }
+}

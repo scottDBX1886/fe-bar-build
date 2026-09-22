@@ -141,6 +141,29 @@ def test_generation_rejects_any_endpoint_other_than_the_approved_model():
         databricks_completer("another-endpoint")
 
 
+def test_databricks_completer_converts_internal_messages_at_sdk_boundary(monkeypatch):
+    """SDK query serialization receives ChatMessage values, not internal dictionaries."""
+    serialized_messages = []
+
+    class FakeServingEndpoints:
+        def query(self, *, messages, **_kwargs):
+            serialized_messages.extend(message.as_dict() for message in messages)
+            message = type("Message", (), {"content": "completion"})()
+            choice = type("Choice", (), {"message": message})()
+            return type("Response", (), {"choices": [choice]})()
+
+    class FakeWorkspaceClient:
+        serving_endpoints = FakeServingEndpoints()
+
+    import databricks.sdk
+
+    monkeypatch.setattr(databricks.sdk, "WorkspaceClient", FakeWorkspaceClient)
+    complete = databricks_completer()
+
+    assert complete([{"role": "user", "content": "student facts"}]) == "completion"
+    assert serialized_messages == [{"content": "student facts", "role": "user"}]
+
+
 def test_generation_run_id_is_published_through_injectable_task_values():
     """The job handoff must publish the exact cohort identity or fail loudly."""
     calls = []

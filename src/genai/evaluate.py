@@ -5,8 +5,15 @@ from __future__ import annotations
 import argparse
 import math
 import re
+import sys
 from collections.abc import Callable, Mapping
 from typing import Any
+
+# Serverless Spark Python tasks execute through ``exec`` without ``__file__``.
+if "--bundle-root" in sys.argv:
+    _BUNDLE_ROOT = sys.argv[sys.argv.index("--bundle-root") + 1]
+    if _BUNDLE_ROOT not in sys.path:
+        sys.path.insert(0, _BUNDLE_ROOT)
 
 from mlflow.genai.scorers import scorer
 
@@ -289,6 +296,7 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema-prefix", required=True)
     parser.add_argument("--generation-run-id", required=True)
+    parser.add_argument("--bundle-root", required=True)
     return parser.parse_args()
 
 

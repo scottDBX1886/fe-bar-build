@@ -291,13 +291,18 @@ def databricks_completer(endpoint: str = MODEL_ID) -> Callable[[list[dict[str, s
     """
     _require_endpoint(endpoint)
     from databricks.sdk import WorkspaceClient
+    from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 
     client = WorkspaceClient()
 
     def complete(messages: list[dict[str, str]]) -> str:
+        sdk_messages = [
+            ChatMessage(content=message["content"], role=ChatMessageRole(message["role"]))
+            for message in messages
+        ]
         response = client.serving_endpoints.query(
             name=endpoint,
-            messages=messages,
+            messages=sdk_messages,
             temperature=TEMPERATURE,
             max_tokens=MAX_TOKENS,
         )

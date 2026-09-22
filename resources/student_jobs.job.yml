@@ -114,6 +114,8 @@ resources:
               - ${var.schema_prefix}
               - --generation-run-id
               - "{{tasks.generate_advisor_briefings.values.generation_run_id}}"
+              - --bundle-root
+              - ${workspace.root_path}/files
       environments:
         - environment_key: default
           spec:

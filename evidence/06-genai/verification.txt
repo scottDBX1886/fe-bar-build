@@ -38,7 +38,36 @@ Result: 101 passed in 1.40s.
 DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
 Result: Validation OK.
 
-Remote generation and evaluation: not run in this capture; no remote claims are made.
+Remote generation and evaluation had no successful run in this capture; no
+remote success claim is made. Failed-attempt diagnostic evidence:
+- Databricks attempts 325260807637781 and 436087485840055: evaluation failed
+  with ModuleNotFoundError for src because serverless exec lacked the bundle
+  root on sys.path.
+- SQL statement 01f1b69e-304e-12a0-b40a-e9868c7c0f57: all 50 bounded
+  generation rows were failed.
+- SQL statement 01f1b69e-45d4-1ace-a8f7-49a6423279a6: the shared failure
+  category was `'dict' object has no attribute 'as_dict'`, proving SDK message
+  dictionaries were passed without ChatMessage conversion.
+
+Fix round 4 TDD red evidence:
+pytest tests/unit/test_genai_evaluation_runtime.py -v
+Result: failed with ModuleNotFoundError: No module named 'src'.
+
+pytest tests/unit/test_genai_contract.py::test_databricks_completer_converts_internal_messages_at_sdk_boundary -v
+Result: failed with AttributeError: 'dict' object has no attribute 'as_dict'.
+
+Fix round 4 local green verification:
+pytest tests/unit/test_genai_contract.py tests/unit/test_genai_evaluation_runtime.py -v
+Result: 25 passed in 4.78s.
+
+pytest -v
+Result: 105 passed in 4.82s.
+
+python3 -m compileall -q src tests
+Result: exit 0.
+
+DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
+Result: Validation OK.
 
 Fix round 1 local regression verification:
 pytest tests/unit/test_genai_contract.py -v

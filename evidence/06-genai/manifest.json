@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "task": "06-genai",
-  "captured_at": "2026-09-22T14:20:00Z",
+  "captured_at": "2026-09-22T18:06:00Z",
   "profile": "fe-bar",
   "workspace": "fevm-serverless-stable-febar-scottj.cloud.databricks.com",
   "resources": {
@@ -10,10 +10,10 @@
     "target_table": "serverless_stable_febar_scottj_catalog.student_retention_gold.advisor_summaries"
   },
   "commands": [
-    "pytest tests/unit/test_genai_contract.py -v",
-    "pytest -v",
-    "python -m py_compile $(find src -name '*.py' -type f | sort)",
-    "DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar"
+    "pytest -q",
+    "python3 -m compileall -q src tests",
+    "databricks bundle validate --strict -t dev --profile fe-bar",
+    "databricks bundle run student_retention_daily -t dev --only generate_advisor_briefings,evaluate_advisor_briefings --profile fe-bar"
   ],
   "artifacts": [
     "README.md",

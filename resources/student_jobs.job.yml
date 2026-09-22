@@ -94,7 +94,7 @@ resources:
               - --schema-prefix
               - ${var.schema_prefix}
               - --cohort-limit
-              - "50"
+              - "5"
               - --endpoint
               - ${var.foundation_model_endpoint}
         - task_key: evaluate_advisor_briefings
@@ -125,6 +125,8 @@ resources:
             client: "4"
             dependencies:
               - mlflow>=3.9,<3.10
+              - litellm>=1.75,<2
+              - pydantic>=2.11,<3
               - scikit-learn>=1.5,<2
               - xgboost>=2.1,<4
               - shap>=0.46,<1

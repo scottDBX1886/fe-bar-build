@@ -1,4 +1,20 @@
 {
-  "results": [],
-  "reason": "No remote SQL was run; this package records local contract and bundle validation only."
+  "generation_run_id": "94547bb4e746dad5bf41a9a906e22ff51c786ed8668e6a6547fc8d540a7b9cfe",
+  "groups": [
+    {
+      "generation_status": "succeeded",
+      "evaluation_status": "passed",
+      "row_count": 2,
+      "all_successes_have_citations": true,
+      "rows_with_unsupported_claims": 0,
+      "sanitized_error": null
+    },
+    {
+      "generation_status": "failed",
+      "evaluation_status": "not_evaluated",
+      "row_count": 3,
+      "rows_with_unsupported_claims": 0,
+      "sanitized_error": "generation failed after 3 attempts: model response is not strict JSON"
+    }
+  ]
 }

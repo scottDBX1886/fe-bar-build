@@ -1,10 +1,16 @@
 {
-  "capture_type": "local_bundle_validation",
-  "remote_generation_run": "not_run",
-  "remote_mlflow_evaluation": "not_run",
-  "bundle_validation": {
-    "status": "OK",
-    "target": "dev",
-    "bundle": "student-retention"
+  "capture_type": "remote_bounded_validation",
+  "databricks_parent_run_id": 243639855860599,
+  "generation_task_run_id": 731664411671829,
+  "evaluation_task_run_id": 640904914428671,
+  "mlflow_evaluation_run_id": "519f5307483441779eff65b662e44714",
+  "status": "SUCCESS",
+  "cohort": {"requested": 5, "published": 2, "visible_failures": 3},
+  "metrics": {
+    "prohibited_claim_check/mean": 1.0,
+    "citation_coverage/mean": 1.0,
+    "unsupported_fact_check/mean": 1.0,
+    "safety/mean": 1.0,
+    "advisor_briefing_grounding_guidelines/mean": 1.0
   }
 }

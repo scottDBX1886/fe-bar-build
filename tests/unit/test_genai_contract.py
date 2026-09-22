@@ -16,6 +16,7 @@ import pytest
 from src.genai.evaluate import (
     EvaluationGateFailure,
     assert_evaluation_gates,
+    build_builtin_scorers,
     citation_coverage,
     prohibited_claim_check,
     unsupported_fact_check,
@@ -41,6 +42,26 @@ CASES = json.loads(
         encoding="utf-8"
     )
 )
+
+
+def test_builtin_judges_use_the_selected_databricks_endpoint_directly():
+    """Safety and guideline judges must not depend on managed databricks-agents."""
+    scorers = build_builtin_scorers()
+
+    assert [item.model for item in scorers] == [
+        "databricks:/databricks-glm-5-3",
+        "databricks:/databricks-glm-5-3",
+    ]
+
+
+def test_ml_environment_installs_direct_judge_adapter_dependency():
+    """The explicit Databricks judge URI requires MLflow's LiteLLM adapter."""
+    job_definition = (
+        Path(__file__).parents[2] / "resources" / "student_jobs.job.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "litellm>=1.75,<2" in job_definition
+    assert "pydantic>=2.11,<3" in job_definition
 
 
 def test_generation_input_excludes_protected_and_unrestricted_fields():
@@ -420,9 +441,9 @@ def test_evaluation_status_updates_only_the_generated_cohort(monkeypatch):
 
     class FakeSpark:
         catalog = FakeCatalog()
-        def createDataFrame(self, rows, columns):
+        def createDataFrame(self, rows, schema):
             captured["rows"] = rows
-            captured["columns"] = columns
+            captured["schema"] = schema
             return FakeFrame()
         def sql(self, statement): captured["sql"] = statement
 
@@ -433,4 +454,9 @@ def test_evaluation_status_updates_only_the_generated_cohort(monkeypatch):
     )
 
     assert captured["rows"][0][0] == "cohort-123"
+    assert [field.name for field in captured["schema"].fields] == [
+        "generation_run_id",
+        "evaluation_status",
+        "error_message",
+    ]
     assert "target.generation_run_id = source.generation_run_id" in captured["sql"]

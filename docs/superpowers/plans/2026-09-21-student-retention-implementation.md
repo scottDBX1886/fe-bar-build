@@ -331,28 +331,28 @@ Save metric query results, `SHOW GRANTS`, policy tests, and lineage rows to `evi
 - Consumes: Governed risk score, allowed contributing factors, and approved factual student signals.
 - Produces: Versioned advisor summaries with citations and MLflow GenAI evaluation results.
 
-- [ ] **Step 1: Write failing prompt/output contract tests**
+- [x] **Step 1: Write failing prompt/output contract tests**
 
 Define a structured response with `briefing`, `suggested_action`, `citations`, `unsupported_claims`, `prompt_version`, and `model_id`. Test that the input builder excludes protected fields and raw unrestricted notes, every factual sentence references an allowed fact ID, and prohibited diagnostic/disciplinary/causal language is rejected.
 
-- [ ] **Step 2: Verify failure**
+- [x] **Step 2: Verify failure**
 
 Run: `pytest tests/unit/test_genai_contract.py -v`  
 Expected: FAIL because the GenAI contract is absent.
 
-- [ ] **Step 3: Implement constrained generation**
+- [x] **Step 3: Implement constrained generation**
 
 Call the user-selected Databricks Foundation Model endpoint from a Databricks job. Use JSON-structured output, low temperature, an allowlisted fact payload, retries for transient failures, and validation before persistence. A generation failure must leave risk scoring usable and store a visible failed status.
 
-- [ ] **Step 4: Implement MLflow GenAI evaluation**
+- [x] **Step 4: Implement MLflow GenAI evaluation**
 
 Use `mlflow.genai.evaluate()` with nested `inputs`, a fixed synthetic dataset, built-in safety/guideline scorers, and deterministic custom checks for citation coverage, unsupported facts, and prohibited claims. Record named baseline results for regression comparison.
 
-- [ ] **Step 5: Execute, gate, and capture evidence**
+- [x] **Step 5: Execute, gate, and capture evidence**
 
 Generate briefings for a bounded scored cohort. Require zero protected-field leakage, zero accepted unsupported claims, complete citation coverage for factual statements, and passing safety/guideline thresholds before publishing summaries.
 
-- [ ] **Step 6: Walk through and commit**
+- [x] **Step 6: Walk through and commit**
 
 Save sanitized inputs, outputs, scorer results, and failures to `evidence/06-genai/`. Commit with `feat: add grounded advisor briefings`.
 

@@ -38,8 +38,7 @@ Result: 101 passed in 1.40s.
 DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
 Result: Validation OK.
 
-Remote generation and evaluation had no successful run in this capture; no
-remote success claim is made. Failed-attempt diagnostic evidence:
+Earlier failed-attempt diagnostic evidence retained for traceability:
 - Databricks attempts 325260807637781 and 436087485840055: evaluation failed
   with ModuleNotFoundError for src because serverless exec lacked the bundle
   root on sys.path.
@@ -68,6 +67,32 @@ Result: exit 0.
 
 DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
 Result: Validation OK.
+
+Final local verification:
+pytest -q
+Result: 107 passed in 3.98s.
+
+python3 -m compileall -q src tests
+Result: exit 0.
+
+DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
+Result: Validation OK.
+
+Final remote verification:
+- Parent job run 243639855860599: SUCCESS
+- Generation task 731664411671829: SUCCESS
+- Evaluation task 640904914428671: SUCCESS
+- MLflow evaluation run 519f5307483441779eff65b662e44714
+- prohibited_claim_check/mean: 1.0
+- citation_coverage/mean: 1.0
+- unsupported_fact_check/mean: 1.0
+- safety/mean: 1.0
+- advisor_briefing_grounding_guidelines/mean: 1.0
+
+Unity Catalog publication verification:
+- Generation run 94547bb4e746dad5bf41a9a906e22ff51c786ed8668e6a6547fc8d540a7b9cfe
+- 2 succeeded rows: evaluation_status=passed, complete citations, zero unsupported claims
+- 3 failed rows: evaluation_status=not_evaluated, visible strict-JSON failure after 3 attempts
 
 Fix round 1 local regression verification:
 pytest tests/unit/test_genai_contract.py -v

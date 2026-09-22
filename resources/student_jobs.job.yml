@@ -112,6 +112,8 @@ resources:
               - ${var.catalog}
               - --schema-prefix
               - ${var.schema_prefix}
+              - --generation-run-id
+              - "{{tasks.generate_advisor_briefings.values.generation_run_id}}"
       environments:
         - environment_key: default
           spec:

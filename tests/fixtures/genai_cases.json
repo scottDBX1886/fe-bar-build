@@ -13,14 +13,19 @@
     "raw_unrestricted_notes": "Do not include this unrestricted note."
   },
   "expected_fact_ids": [
+    "risk_score",
+    "risk_tier",
     "attendance_rate_28d",
     "missed_assignments_28d",
     "days_since_lms_activity",
     "financial_hold_flag"
   ],
   "valid_response": {
-    "briefing": "Attendance was 58% in the last 28 days [attendance_rate_28d]. Four assignments were missed in the last 28 days [missed_assignments_28d].",
-    "suggested_action": "Offer a supportive check-in and ask whether the student would like help identifying next steps.",
+    "briefing": [
+      {"fact_id": "attendance_rate_28d", "fact_value": 0.58},
+      {"fact_id": "missed_assignments_28d", "fact_value": 4}
+    ],
+    "suggested_action": "offer_supportive_check_in",
     "citations": ["attendance_rate_28d", "missed_assignments_28d"],
     "unsupported_claims": [],
     "prompt_version": "advisor-briefing-v1",

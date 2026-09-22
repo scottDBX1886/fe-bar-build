@@ -128,14 +128,22 @@ unrestricted notes, labels, or any other source fields.
 
 Responses must be a strict JSON object containing `briefing`,
 `suggested_action`, `citations`, `unsupported_claims`, `prompt_version`, and
-`model_id`. Every briefing sentence has an inline citation to an allowlisted
-fact ID; accepted responses have no unsupported claims. Diagnostic,
-disciplinary, protected-trait, and retention-causality content is rejected.
+`model_id`. `briefing` is a non-empty list of `{fact_id, fact_value}` objects:
+each ID and value must exactly equal a supplied allowlisted fact, and
+`citations` must exactly match the selected IDs. The advisor-visible sentences
+are rendered deterministically from those verified values, not from model prose.
+`suggested_action` is an approved action code rendered from a fixed template,
+so it cannot carry unsupported student claims. Accepted responses have no
+unsupported claims. Diagnostic, disciplinary, protected-trait, and
+retention-causality content is rejected at generation and deterministic
+evaluation time.
 
 `<catalog>.<schema_prefix>_gold.advisor_summaries` is versioned by prompt
-version and idempotent summary key. It records model ID, citations, generation
-and evaluation status, timestamp, and visible error text. Generated summaries
-remain `evaluation_status = 'pending'` and are not publishable until the named
-MLflow gates pass; a failed gate is visibly marked `failed`. It contains no
-risk score and does not modify `student_risk_score_history`; endpoint or
+version, approved endpoint, and idempotent summary key. It also stores a stable
+generated-cohort identity; only rows from that exact cohort can be updated by
+its evaluation task. It records model ID, citations, generation and evaluation
+status, timestamp, and visible error text. Generated summaries remain
+`evaluation_status = 'pending'` and are not publishable until the named MLflow
+gates are exactly `1.0`; a failed gate is visibly marked `failed`. It contains
+no risk score and does not modify `student_risk_score_history`; endpoint or
 validation failure produces a `generation_status = 'failed'` record instead.

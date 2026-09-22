@@ -19,3 +19,13 @@ DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --p
 Result: Validation OK.
 
 Remote generation and evaluation: not run in this capture; no remote claims are made.
+
+Fix round 1 local regression verification:
+pytest tests/unit/test_genai_contract.py -v
+Result: 18 passed in 1.52s.
+
+pytest -v
+Result: 98 passed in 1.37s.
+
+DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
+Result: Validation OK.

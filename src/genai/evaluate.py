@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -11,8 +12,8 @@ from mlflow.genai.scorers import scorer
 from src.genai.generate import (
     MODEL_ID,
     PROMPT_VERSION,
-    _CITATION,
-    _briefing_sentences,
+    _fact_values_equal,
+    _require_endpoint,
     prohibited_matches,
 )
 
@@ -29,7 +30,7 @@ FIXED_SYNTHETIC_EVALUATION_DATASET = [
                 "facts": [{"id": "attendance_rate_28d", "value": 0.58}],
             }
         },
-        "expectations": {"allowed_fact_ids": ["attendance_rate_28d"]},
+        "expectations": {"allowed_facts": [{"id": "attendance_rate_28d", "value": 0.58}]},
     }
 ]
 
@@ -57,9 +58,12 @@ def _gate_metric(metrics: Mapping[str, Any], name: str) -> float:
     if not matches:
         raise EvaluationGateFailure(f"missing required evaluation metric: {name}")
     try:
-        return min(float(value) for value in matches)
+        value = min(float(value) for value in matches)
     except (TypeError, ValueError) as error:
         raise EvaluationGateFailure(f"invalid evaluation metric: {name}") from error
+    if not math.isfinite(value):
+        raise EvaluationGateFailure(f"invalid evaluation metric: {name}")
+    return value
 
 
 def assert_evaluation_gates(result_or_metrics: Any) -> None:
@@ -68,32 +72,55 @@ def assert_evaluation_gates(result_or_metrics: Any) -> None:
     if not isinstance(metrics, Mapping):
         raise EvaluationGateFailure("MLflow evaluation did not return metrics")
     for name in _REQUIRED_GATE_METRICS:
-        if _gate_metric(metrics, name) < 1.0:
+        if _gate_metric(metrics, name) != 1.0:
             raise EvaluationGateFailure(f"evaluation gate failed: {name}")
 
 
-def citation_coverage(output: Mapping[str, Any], allowed_fact_ids: set[str]) -> float:
-    """Return citation coverage for every factual briefing sentence."""
-    briefing = str(output.get("briefing", ""))
-    sentences = _briefing_sentences(briefing)
-    if not sentences:
+def citation_coverage(
+    output: Mapping[str, Any], allowed_facts: list[Mapping[str, Any]]
+) -> float:
+    """Score fact/value-bound briefing objects and controlled actions exactly."""
+    briefing = output.get("briefing", [])
+    if not isinstance(briefing, list) or not briefing:
+        return 0.0
+    allowed = {fact["id"]: fact["value"] for fact in allowed_facts}
+    if output.get("citations") != [item.get("fact_id") for item in briefing if isinstance(item, Mapping)]:
+        return 0.0
+    if output.get("suggested_action") not in {
+        "offer_supportive_check_in", "offer_resource_navigation", "ask_about_barriers"
+    }:
         return 0.0
     covered = sum(
-        bool(set(_CITATION.findall(sentence)) & allowed_fact_ids) for sentence in sentences
+        isinstance(item, Mapping)
+        and item.get("fact_id") in allowed
+        and _fact_values_equal(item.get("fact_value"), allowed[item["fact_id"]])
+        for item in briefing
     )
-    return covered / len(sentences)
+    return covered / len(briefing)
 
 
 def unsupported_fact_check(
-    output: Mapping[str, Any], allowed_fact_ids: set[str]
+    output: Mapping[str, Any], allowed_facts: list[Mapping[str, Any]]
 ) -> dict[str, Any]:
-    """Reject unknown citations and model-admitted unsupported claims."""
-    cited = set(_CITATION.findall(str(output.get("briefing", ""))))
-    unknown = sorted(cited - allowed_fact_ids)
+    """Reject unknown IDs and fact/value substitutions in both output fields."""
+    allowed = {fact["id"]: fact["value"] for fact in allowed_facts}
+    unsupported: list[str] = []
+    for item in output.get("briefing", []):
+        if not isinstance(item, Mapping) or item.get("fact_id") not in allowed:
+            unsupported.append(str(item))
+        elif not _fact_values_equal(item.get("fact_value"), allowed[item["fact_id"]]):
+            unsupported.append(str(item["fact_id"]))
+    citations = output.get("citations", [])
+    if citations != [item.get("fact_id") for item in output.get("briefing", []) if isinstance(item, Mapping)]:
+        unsupported.append("citation_mismatch")
+    if output.get("suggested_action") not in {
+        "offer_supportive_check_in", "offer_resource_navigation", "ask_about_barriers"
+    }:
+        unsupported.append("suggested_action")
     claimed = list(output.get("unsupported_claims", []))
     return {
-        "passed": not unknown and not claimed,
-        "unsupported_claims": unknown + claimed,
+        "passed": not unsupported and not claimed,
+        "unsupported_claims": unsupported + claimed,
     }
 
 
@@ -107,7 +134,7 @@ def prohibited_claim_check(output: Mapping[str, Any]) -> dict[str, Any]:
 def citation_coverage_scorer(*, inputs: dict[str, Any], outputs: dict[str, Any], expectations: dict[str, Any] | None = None) -> float:
     """MLflow custom scorer for deterministic citation coverage."""
     del inputs
-    allowed = set((expectations or {}).get("allowed_fact_ids", []))
+    allowed = list((expectations or {}).get("allowed_facts", []))
     value = citation_coverage(outputs, allowed)
     return value
 
@@ -116,7 +143,7 @@ def citation_coverage_scorer(*, inputs: dict[str, Any], outputs: dict[str, Any],
 def unsupported_fact_scorer(*, inputs: dict[str, Any], outputs: dict[str, Any], expectations: dict[str, Any] | None = None) -> float:
     """MLflow custom scorer for deterministic unsupported-fact rejection."""
     del inputs
-    allowed = set((expectations or {}).get("allowed_fact_ids", []))
+    allowed = list((expectations or {}).get("allowed_facts", []))
     result = unsupported_fact_check(outputs, allowed)
     return float(result["passed"])
 
@@ -178,6 +205,7 @@ def evaluate_endpoint(*, endpoint: str = MODEL_ID, max_attempts: int = 3) -> Any
     """Evaluate the selected endpoint through the same validated generator."""
     from src.genai.generate import databricks_completer, generate_validated_summary
 
+    _require_endpoint(endpoint)
     complete = databricks_completer(endpoint)
 
     def predict_fn(*, briefing_request: dict[str, Any]) -> dict[str, Any]:
@@ -189,7 +217,8 @@ def evaluate_endpoint(*, endpoint: str = MODEL_ID, max_attempts: int = 3) -> Any
 
 
 def update_summary_evaluation_status(
-    *, catalog: str, schema_prefix: str, status: str, error_message: str | None = None
+    *, catalog: str, schema_prefix: str, generation_run_id: str, status: str,
+    error_message: str | None = None,
 ) -> None:
     """Make the run-wide gate visible without touching any risk-score table."""
     if status not in {"passed", "failed"}:
@@ -201,15 +230,15 @@ def update_summary_evaluation_status(
     if not spark.catalog.tableExists(target):
         return
     updates = spark.createDataFrame(
-        [(PROMPT_VERSION, status, error_message[:2000] if error_message else None)],
-        ["summary_version", "evaluation_status", "error_message"],
+        [(generation_run_id, status, error_message[:2000] if error_message else None)],
+        ["generation_run_id", "evaluation_status", "error_message"],
     )
     updates.createOrReplaceTempView("_advisor_summary_evaluation_status")
     spark.sql(
         f"""
         MERGE INTO {target} AS target
         USING _advisor_summary_evaluation_status AS source
-          ON target.summary_version = source.summary_version
+          ON target.generation_run_id = source.generation_run_id
          AND target.generation_status = 'succeeded'
         WHEN MATCHED THEN UPDATE SET
           target.evaluation_status = source.evaluation_status,
@@ -219,7 +248,8 @@ def update_summary_evaluation_status(
 
 
 def evaluate_and_publish_summaries(
-    *, catalog: str, schema_prefix: str, endpoint: str = MODEL_ID, max_attempts: int = 3
+    *, catalog: str, schema_prefix: str, generation_run_id: str,
+    endpoint: str = MODEL_ID, max_attempts: int = 3,
 ) -> Any:
     """Evaluate first; only then mark generated summaries publishable."""
     try:
@@ -229,12 +259,14 @@ def evaluate_and_publish_summaries(
         update_summary_evaluation_status(
             catalog=catalog,
             schema_prefix=schema_prefix,
+            generation_run_id=generation_run_id,
             status="failed",
             error_message=str(error),
         )
         raise
     update_summary_evaluation_status(
-        catalog=catalog, schema_prefix=schema_prefix, status="passed"
+        catalog=catalog, schema_prefix=schema_prefix,
+        generation_run_id=generation_run_id, status="passed"
     )
     return result
 
@@ -246,6 +278,7 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument("--experiment-path", required=True)
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema-prefix", required=True)
+    parser.add_argument("--generation-run-id", required=True)
     return parser.parse_args()
 
 
@@ -258,6 +291,7 @@ if __name__ == "__main__":
         evaluate_and_publish_summaries(
             catalog=args.catalog,
             schema_prefix=args.schema_prefix,
+            generation_run_id=args.generation_run_id,
             endpoint=args.endpoint,
             max_attempts=args.max_attempts,
         )

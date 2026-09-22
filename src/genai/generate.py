@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime, timezone
@@ -40,15 +41,17 @@ REQUIRED_RESPONSE_FIELDS = {
     "model_id",
 }
 PROHIBITED_PATTERNS = (
-    r"\bdiagnos(?:e|ed|is|tic)\b",
-    r"\b(depression|anxiety|mental health disorder)\b",
-    r"\bdisciplin(?:ary|e|ed)\b",
-    r"\b(probation|suspend|suspension|expel|expulsion)\b",
-    r"\b(will|would|can)\s+(cause|ensure|guarantee)\s+(?:the )?(?:student )?(?:to )?(retain|retention|persistence)\b",
-    r"\b(first[ -]generation|gender|race|ethnicity|age band|residency status)\b",
+    r"\b(diagnos(?:e|ed|is|tic)|depression|anxiety|adhd|mental health)\b",
+    r"\b(disciplin(?:ary|e|ed)|punish|punishment|probation|suspend|suspension|expel|expulsion)\b",
+    r"\b(will|would|can|shall|may)\s+(cause|ensure|guarantee|improve|increase)\s+(?:the )?(?:student )?(?:to )?(retain|retention|persistence)\b",
+    r"\b(first[ -]generation|gender|race|ethnicity|age band|residency status|female|male|nonbinary)\b",
 )
-_CITATION = re.compile(r"\[([A-Za-z][A-Za-z0-9_]*)\]")
 _OPTIONAL_JSON_FENCE = re.compile(r"\A```json\s*\n?(.*?)\n?```\s*\Z", re.DOTALL)
+ALLOWED_ACTIONS = {
+    "offer_supportive_check_in": "Offer a supportive check-in and ask whether the student would like help identifying next steps.",
+    "offer_resource_navigation": "Offer to help the student identify and navigate available support resources.",
+    "ask_about_barriers": "Invite the student to discuss any barriers they would like support addressing.",
+}
 
 
 class GenerationFailure(ValueError):
@@ -62,9 +65,42 @@ def _json_value(value: Any) -> Any:
     return value
 
 
+def _require_endpoint(endpoint: str) -> None:
+    if endpoint != MODEL_ID:
+        raise ValueError(f"Task 7 requires the approved endpoint: {MODEL_ID}")
+
+
+def _fact_values_equal(actual: Any, expected: Any) -> bool:
+    """Compare values with JSON semantics, avoiding Python's ``False == 0``."""
+    return json.dumps(actual, sort_keys=True, separators=(",", ":")) == json.dumps(
+        expected, sort_keys=True, separators=(",", ":")
+    )
+
+
+def _allowed_fact_map(
+    *,
+    allowed_facts: Sequence[Mapping[str, Any]] | None,
+    allowed_fact_ids: Sequence[str] | set[str] | None,
+) -> dict[str, Any | None]:
+    if allowed_facts is not None:
+        result: dict[str, Any | None] = {}
+        for fact in allowed_facts:
+            if set(fact) != {"id", "value"} or not isinstance(fact["id"], str):
+                raise GenerationFailure("allowed facts must contain id and value")
+            result[fact["id"]] = fact["value"]
+        return result
+    return {fact_id: None for fact_id in (allowed_fact_ids or [])}
+
+
 def build_generation_input(student_detail: Mapping[str, Any]) -> dict[str, Any]:
     """Create a minimal prompt payload from approved Gold fields only."""
+    risk_score = float(student_detail["risk_score"])
+    if not math.isfinite(risk_score):
+        raise GenerationFailure("risk_score must be finite")
     facts = [
+        {"id": "risk_score", "value": risk_score},
+        {"id": "risk_tier", "value": str(student_detail["risk_tier"])},
+    ] + [
         {"id": field, "value": _json_value(student_detail[field])}
         for field in APPROVED_FACT_FIELDS
         if field in student_detail and student_detail[field] is not None
@@ -77,7 +113,7 @@ def build_generation_input(student_detail: Mapping[str, Any]) -> dict[str, Any]:
     ]
     return {
         "student_id": str(student_detail["student_id"]),
-        "risk_score": float(student_detail["risk_score"]),
+        "risk_score": risk_score,
         "risk_tier": str(student_detail["risk_tier"]),
         "contributing_factors": contributing_factors,
         "facts": facts,
@@ -85,20 +121,18 @@ def build_generation_input(student_detail: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _messages(payload: Mapping[str, Any]) -> list[dict[str, str]]:
-    fact_ids = [fact["id"] for fact in payload["facts"]]
     system = (
         "You write concise advisor briefings. Return exactly one JSON object and no prose. "
         "Required keys are briefing, suggested_action, citations, unsupported_claims, "
-        "prompt_version, and model_id. Cite every factual briefing sentence with an "
-        "inline [fact_id] from the supplied facts; citations must list exactly those IDs. "
-        "Do not diagnose, recommend discipline, infer protected traits, or claim an "
-        "action causes retention. Set unsupported_claims to [] only when every claim is "
-        "supported."
+        "prompt_version, and model_id. briefing is a non-empty JSON array of objects with "
+        "exactly fact_id and fact_value, copied exactly from supplied facts. citations must "
+        "be the matching unique fact_id array. suggested_action must be one of "
+        f"{sorted(ALLOWED_ACTIONS)}. Do not diagnose, recommend discipline, infer protected "
+        "traits, or claim an action causes retention. Set unsupported_claims to []."
     )
     request = {
         "prompt_version": PROMPT_VERSION,
         "model_id": MODEL_ID,
-        "allowed_fact_ids": fact_ids,
         "student": payload,
     }
     return [
@@ -111,15 +145,28 @@ def _briefing_sentences(briefing: str) -> list[str]:
     return [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", briefing) if sentence.strip()]
 
 
-def _contains_student_fact(sentence: str) -> bool:
-    """Identify factual signal language in an otherwise action-oriented sentence."""
-    return bool(
-        re.search(
-            r"\b(attendance|assignments?|lms|activity|financial hold|gpa|risk score|risk tier)\b|\d+%",
-            sentence,
-            re.IGNORECASE,
-        )
-    )
+def render_briefing(facts: Sequence[Mapping[str, Any]]) -> str:
+    """Render the sole advisor-visible factual wording from verified fact values."""
+    rendered: list[str] = []
+    for fact in facts:
+        fact_id, value = fact["fact_id"], fact["fact_value"]
+        if fact_id == "risk_score":
+            rendered.append(f"Current governed risk score is {value:.2f}.")
+        elif fact_id == "risk_tier":
+            rendered.append(f"Current governed risk tier is {value}.")
+        elif fact_id == "attendance_rate_28d":
+            rendered.append(f"Attendance was {value:.0%} in the last 28 days.")
+        elif fact_id == "missed_assignments_28d":
+            rendered.append(f"{value} assignments were missed in the last 28 days.")
+        elif fact_id == "days_since_lms_activity":
+            rendered.append(f"Most recent LMS activity was {value} days ago.")
+        elif fact_id == "financial_hold_flag":
+            rendered.append("A financial hold is active." if value else "No financial hold is active.")
+        elif fact_id == "cumulative_gpa":
+            rendered.append(f"Cumulative GPA is {value:.2f}.")
+        else:  # Validate before persistence makes this unreachable.
+            raise GenerationFailure(f"cannot render unapproved fact: {fact_id}")
+    return " ".join(rendered)
 
 
 def prohibited_matches(response: Mapping[str, Any]) -> list[str]:
@@ -128,17 +175,19 @@ def prohibited_matches(response: Mapping[str, Any]) -> list[str]:
 
 
 def validate_summary(
-    response: Mapping[str, Any], *, allowed_fact_ids: Sequence[str] | set[str]
+    response: Mapping[str, Any], *,
+    allowed_facts: Sequence[Mapping[str, Any]] | None = None,
+    allowed_fact_ids: Sequence[str] | set[str] | None = None,
 ) -> dict[str, Any]:
     """Validate the complete output schema and grounding contract before storage."""
     if not isinstance(response, Mapping):
         raise GenerationFailure("response must be a JSON object")
     if set(response) != REQUIRED_RESPONSE_FIELDS:
         raise GenerationFailure("response fields must exactly match the briefing schema")
-    if not isinstance(response["briefing"], str) or not response["briefing"].strip():
-        raise GenerationFailure("briefing must be a non-empty string")
-    if not isinstance(response["suggested_action"], str) or not response["suggested_action"].strip():
-        raise GenerationFailure("suggested_action must be a non-empty string")
+    if not isinstance(response["briefing"], list) or not response["briefing"]:
+        raise GenerationFailure("briefing must be a non-empty list of structured facts")
+    if response["suggested_action"] not in ALLOWED_ACTIONS:
+        raise GenerationFailure("suggested_action must be an approved action code")
     if not isinstance(response["citations"], list) or not all(
         isinstance(item, str) for item in response["citations"]
     ):
@@ -154,28 +203,33 @@ def validate_summary(
     if response["model_id"] != MODEL_ID:
         raise GenerationFailure("model_id does not match the selected endpoint")
 
-    allowed = set(allowed_fact_ids)
-    cited = _CITATION.findall(
-        f"{response['briefing']} {response['suggested_action']}"
-    )
-    if not cited:
+    allowed = _allowed_fact_map(allowed_facts=allowed_facts, allowed_fact_ids=allowed_fact_ids)
+    briefing_ids: list[str] = []
+    for item in response["briefing"]:
+        if not isinstance(item, Mapping) or set(item) != {"fact_id", "fact_value"}:
+            raise GenerationFailure("briefing facts require exactly fact_id and fact_value")
+        fact_id = item["fact_id"]
+        if not isinstance(fact_id, str) or fact_id not in allowed:
+            raise GenerationFailure("briefing fact is not an allowed fact ID")
+        expected = allowed[fact_id]
+        if expected is not None and not _fact_values_equal(item["fact_value"], expected):
+            raise GenerationFailure("briefing fact value must exactly match the supplied fact")
+        briefing_ids.append(fact_id)
+    if len(set(briefing_ids)) != len(briefing_ids):
+        raise GenerationFailure("briefing facts must not repeat")
+    if not briefing_ids:
         raise GenerationFailure("briefing requires at least one citation")
-    if any(fact_id not in allowed for fact_id in cited):
-        raise GenerationFailure("citation is not an allowed fact ID")
-    if set(response["citations"]) != set(cited) or len(response["citations"]) != len(set(cited)):
-        raise GenerationFailure("citations must exactly match inline citations")
-    for sentence in _briefing_sentences(response["briefing"]):
-        if not _CITATION.search(sentence):
-            raise GenerationFailure("every factual briefing sentence requires a citation")
-    for sentence in _briefing_sentences(response["suggested_action"]):
-        if _contains_student_fact(sentence) and not _CITATION.search(sentence):
-            raise GenerationFailure("every factual suggested_action sentence requires a citation")
+    if response["citations"] != briefing_ids:
+        raise GenerationFailure("citations must exactly match briefing fact IDs")
     if matches := prohibited_matches(response):
         raise GenerationFailure(f"prohibited claim: {matches[0]}")
     return dict(response)
 
 
-def parse_model_response(raw: str, *, allowed_fact_ids: Sequence[str] | set[str]) -> dict[str, Any]:
+def parse_model_response(
+    raw: str, *, allowed_facts: Sequence[Mapping[str, Any]] | None = None,
+    allowed_fact_ids: Sequence[str] | set[str] | None = None,
+) -> dict[str, Any]:
     """Parse strict JSON, accepting only a single optional ``json`` code fence."""
     if not isinstance(raw, str):
         raise GenerationFailure("model response must be text JSON")
@@ -185,7 +239,7 @@ def parse_model_response(raw: str, *, allowed_fact_ids: Sequence[str] | set[str]
         parsed = json.loads(candidate)
     except json.JSONDecodeError as error:
         raise GenerationFailure("model response is not strict JSON") from error
-    return validate_summary(parsed, allowed_fact_ids=allowed_fact_ids)
+    return validate_summary(parsed, allowed_facts=allowed_facts, allowed_fact_ids=allowed_fact_ids)
 
 
 def generate_validated_summary(
@@ -197,13 +251,12 @@ def generate_validated_summary(
     """Retry invalid/transient completions and return only a validated summary."""
     if max_attempts < 1:
         raise ValueError("max_attempts must be at least one")
-    allowed_fact_ids = [fact["id"] for fact in payload["facts"]]
     messages = _messages(payload)
     last_error: Exception | None = None
     for attempt in range(1, max_attempts + 1):
         try:
             summary = parse_model_response(
-                complete(messages), allowed_fact_ids=allowed_fact_ids
+                complete(messages), allowed_facts=payload["facts"]
             )
             return {
                 **summary,
@@ -235,6 +288,7 @@ def databricks_completer(endpoint: str = MODEL_ID) -> Callable[[list[dict[str, s
     The selected endpoint ignores/rejects ``response_format``.  Prompt-level
     JSON instructions plus local parsing are therefore the governing contract.
     """
+    _require_endpoint(endpoint)
     from databricks.sdk import WorkspaceClient
 
     client = WorkspaceClient()
@@ -252,18 +306,20 @@ def databricks_completer(endpoint: str = MODEL_ID) -> Callable[[list[dict[str, s
 
 
 def failure_summary_record(
-    *, student_id: str, feature_as_of: Any, model_version: str, error: Exception
+    *, student_id: str, feature_as_of: Any, model_version: str, error: Exception,
+    generation_run_id: str = "unknown",
 ) -> dict[str, Any]:
     """Create a visible, non-scoring failure record for a governed summary."""
     timestamp = datetime.now(timezone.utc)
     summary_key = hashlib.sha256(
-        f"{student_id}|{feature_as_of}|{model_version}|{PROMPT_VERSION}".encode()
+        f"{student_id}|{feature_as_of}|{model_version}|{PROMPT_VERSION}|{MODEL_ID}".encode()
     ).hexdigest()
     return {
         "summary_key": summary_key,
         "student_id": student_id,
         "feature_as_of": feature_as_of,
         "model_version": str(model_version),
+        "generation_run_id": generation_run_id,
         "summary_version": PROMPT_VERSION,
         "prompt_version": PROMPT_VERSION,
         "model_id": MODEL_ID,
@@ -285,18 +341,19 @@ def _summary_record(student: Mapping[str, Any], summary: Mapping[str, Any]) -> d
     timestamp = datetime.now(timezone.utc)
     key_material = (
         f"{student['student_id']}|{student['feature_as_of']}|"
-        f"{student['model_version']}|{PROMPT_VERSION}"
+        f"{student['model_version']}|{PROMPT_VERSION}|{MODEL_ID}"
     )
     return {
         "summary_key": hashlib.sha256(key_material.encode()).hexdigest(),
         "student_id": str(student["student_id"]),
         "feature_as_of": student["feature_as_of"],
         "model_version": str(student["model_version"]),
+        "generation_run_id": str(student["generation_run_id"]),
         "summary_version": PROMPT_VERSION,
         "prompt_version": summary["prompt_version"],
         "model_id": summary["model_id"],
-        "briefing": summary["briefing"],
-        "suggested_action": summary["suggested_action"],
+        "briefing": render_briefing(summary["briefing"]),
+        "suggested_action": ALLOWED_ACTIONS[summary["suggested_action"]],
         "citations": summary["citations"],
         "unsupported_claims": summary["unsupported_claims"],
         "generation_status": summary["generation_status"],
@@ -308,15 +365,40 @@ def _summary_record(student: Mapping[str, Any], summary: Mapping[str, Any]) -> d
     }
 
 
+def _summary_schema() -> Any:
+    """Use an explicit nullable schema so an all-failure first run is writable."""
+    from pyspark.sql.types import (
+        ArrayType, IntegerType, StringType, StructField, StructType, TimestampType,
+    )
+
+    return StructType([
+        StructField("summary_key", StringType(), False),
+        StructField("student_id", StringType(), False),
+        StructField("feature_as_of", TimestampType(), True),
+        StructField("model_version", StringType(), False),
+        StructField("generation_run_id", StringType(), False),
+        StructField("summary_version", StringType(), False),
+        StructField("prompt_version", StringType(), False),
+        StructField("model_id", StringType(), False),
+        StructField("briefing", StringType(), True),
+        StructField("suggested_action", StringType(), True),
+        StructField("citations", ArrayType(StringType(), containsNull=False), False),
+        StructField("unsupported_claims", ArrayType(StringType(), containsNull=False), False),
+        StructField("generation_status", StringType(), False),
+        StructField("evaluation_status", StringType(), False),
+        StructField("generation_attempts", IntegerType(), False),
+        StructField("error_message", StringType(), True),
+        StructField("generated_at", TimestampType(), False),
+    ])
+
+
 def persist_summaries(spark: Any, *, target: str, records: list[dict[str, Any]]) -> None:
     """Idempotently persist a prompt-versioned summary status table."""
     if not records:
         return
-    from pyspark.sql import functions as F
-
     # ``risk_score`` is intentionally dropped: summaries cannot overwrite,
     # re-score, or become a source of truth for the governed risk product.
-    frame = spark.createDataFrame(records).drop("risk_score")
+    frame = spark.createDataFrame(records, schema=_summary_schema()).drop("risk_score")
     if not spark.catalog.tableExists(target):
         frame.limit(0).write.format("delta").saveAsTable(target)
     frame.createOrReplaceTempView("_advisor_summary_upserts")
@@ -335,6 +417,7 @@ def generate_advisor_summaries(
     *, catalog: str, schema_prefix: str, cohort_limit: int, endpoint: str = MODEL_ID, max_attempts: int = 3
 ) -> int:
     """Generate a bounded cohort from Gold ``student_detail`` only."""
+    _require_endpoint(endpoint)
     if cohort_limit < 1 or cohort_limit > DEFAULT_COHORT_LIMIT:
         raise ValueError(f"cohort_limit must be between 1 and {DEFAULT_COHORT_LIMIT}")
     from pyspark.sql import SparkSession, functions as F
@@ -347,10 +430,17 @@ def generate_advisor_summaries(
         .orderBy(F.col("risk_score").desc(), F.col("student_id"))
         .limit(cohort_limit)
     )
+    students = [row.asDict(recursive=True) for row in cohort.toLocalIterator()]
+    cohort_material = [
+        f"{row['student_id']}|{row['feature_as_of']}|{row['model_version']}" for row in students
+    ]
+    generation_run_id = hashlib.sha256(
+        f"{PROMPT_VERSION}|{MODEL_ID}|{'|'.join(cohort_material)}".encode()
+    ).hexdigest()
     complete = databricks_completer(endpoint)
     records: list[dict[str, Any]] = []
-    for row in cohort.toLocalIterator():
-        student = row.asDict(recursive=True)
+    for student in students:
+        student["generation_run_id"] = generation_run_id
         try:
             summary = generate_validated_summary(
                 build_generation_input(student), complete=complete, max_attempts=max_attempts
@@ -363,9 +453,14 @@ def generate_advisor_summaries(
                     feature_as_of=student["feature_as_of"],
                     model_version=str(student["model_version"]),
                     error=error,
+                    generation_run_id=generation_run_id,
                 )
             )
     persist_summaries(spark, target=target, records=records)
+    try:
+        dbutils.jobs.taskValues.set(key="generation_run_id", value=generation_run_id)
+    except NameError:
+        pass
     return len(records)
 
 

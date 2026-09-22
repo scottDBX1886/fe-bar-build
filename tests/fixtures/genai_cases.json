@@ -28,7 +28,7 @@
     "suggested_action": "offer_supportive_check_in",
     "citations": ["attendance_rate_28d", "missed_assignments_28d"],
     "unsupported_claims": [],
-    "prompt_version": "advisor-briefing-v1",
+    "prompt_version": "advisor-briefing-v2",
     "model_id": "databricks-glm-5-3"
   }
 }

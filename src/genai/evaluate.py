@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import re
 from collections.abc import Callable, Mapping
 from typing import Any
 
@@ -15,10 +16,11 @@ from src.genai.generate import (
     _fact_values_equal,
     _require_endpoint,
     prohibited_matches,
+    render_briefing,
 )
 
 
-BASELINE_NAME = "advisor-briefing-baseline-v1"
+BASELINE_NAME = "advisor-briefing-baseline-v2"
 FIXED_SYNTHETIC_EVALUATION_DATASET = [
     {
         "inputs": {
@@ -96,7 +98,15 @@ def citation_coverage(
         and _fact_values_equal(item.get("fact_value"), allowed[item["fact_id"]])
         for item in briefing
     )
-    return covered / len(briefing)
+    if covered != len(briefing):
+        return covered / len(briefing)
+    rendered = render_briefing(briefing)
+    sentences = [sentence for sentence in rendered.split(". ") if sentence]
+    if len(sentences) != len(briefing) or not all(
+        re.search(r"\[[A-Za-z][A-Za-z0-9_]*\]\.?$", sentence) for sentence in sentences
+    ):
+        return 0.0
+    return 1.0
 
 
 def unsupported_fact_check(

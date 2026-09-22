@@ -18,7 +18,7 @@ from typing import Any
 
 
 MODEL_ID = "databricks-glm-5-3"
-PROMPT_VERSION = "advisor-briefing-v1"
+PROMPT_VERSION = "advisor-briefing-v2"
 TEMPERATURE = 0.1
 MAX_TOKENS = 1200
 DEFAULT_COHORT_LIMIT = 50
@@ -151,19 +151,20 @@ def render_briefing(facts: Sequence[Mapping[str, Any]]) -> str:
     for fact in facts:
         fact_id, value = fact["fact_id"], fact["fact_value"]
         if fact_id == "risk_score":
-            rendered.append(f"Current governed risk score is {value:.2f}.")
+            rendered.append(f"Current governed risk score is {value:.2f} [{fact_id}].")
         elif fact_id == "risk_tier":
-            rendered.append(f"Current governed risk tier is {value}.")
+            rendered.append(f"Current governed risk tier is {value} [{fact_id}].")
         elif fact_id == "attendance_rate_28d":
-            rendered.append(f"Attendance was {value:.0%} in the last 28 days.")
+            rendered.append(f"Attendance was {value:.0%} in the last 28 days [{fact_id}].")
         elif fact_id == "missed_assignments_28d":
-            rendered.append(f"{value} assignments were missed in the last 28 days.")
+            rendered.append(f"{value} assignments were missed in the last 28 days [{fact_id}].")
         elif fact_id == "days_since_lms_activity":
-            rendered.append(f"Most recent LMS activity was {value} days ago.")
+            rendered.append(f"Most recent LMS activity was {value} days ago [{fact_id}].")
         elif fact_id == "financial_hold_flag":
-            rendered.append("A financial hold is active." if value else "No financial hold is active.")
+            sentence = "A financial hold is active" if value else "No financial hold is active"
+            rendered.append(f"{sentence} [{fact_id}].")
         elif fact_id == "cumulative_gpa":
-            rendered.append(f"Cumulative GPA is {value:.2f}.")
+            rendered.append(f"Cumulative GPA is {value:.2f} [{fact_id}].")
         else:  # Validate before persistence makes this unreachable.
             raise GenerationFailure(f"cannot render unapproved fact: {fact_id}")
     return " ".join(rendered)
@@ -392,15 +393,35 @@ def _summary_schema() -> Any:
     ])
 
 
+def _schema_sql_type(field: Any) -> str:
+    """Render the Spark type accepted by ``ALTER TABLE ADD COLUMNS``."""
+    return field.dataType.simpleString().upper()
+
+
+def ensure_summary_schema(spark: Any, *, target: str, schema: Any) -> None:
+    """Add only absent contract columns to a pre-existing summary table."""
+    existing = {field.name for field in spark.table(target).schema.fields}
+    missing = [field for field in schema.fields if field.name not in existing]
+    if not missing:
+        return
+    columns = ", ".join(
+        f"{field.name} {_schema_sql_type(field)}" for field in missing
+    )
+    spark.sql(f"ALTER TABLE {target} ADD COLUMNS ({columns})")
+
+
 def persist_summaries(spark: Any, *, target: str, records: list[dict[str, Any]]) -> None:
     """Idempotently persist a prompt-versioned summary status table."""
     if not records:
         return
     # ``risk_score`` is intentionally dropped: summaries cannot overwrite,
     # re-score, or become a source of truth for the governed risk product.
-    frame = spark.createDataFrame(records, schema=_summary_schema()).drop("risk_score")
+    schema = _summary_schema()
+    frame = spark.createDataFrame(records, schema=schema).drop("risk_score")
     if not spark.catalog.tableExists(target):
         frame.limit(0).write.format("delta").saveAsTable(target)
+    else:
+        ensure_summary_schema(spark, target=target, schema=schema)
     frame.createOrReplaceTempView("_advisor_summary_upserts")
     spark.sql(
         f"""
@@ -413,8 +434,35 @@ def persist_summaries(spark: Any, *, target: str, records: list[dict[str, Any]])
     )
 
 
+def publish_generation_run_id(
+    generation_run_id: str, *, task_values: Any | None = None
+) -> None:
+    """Publish the cohort identity through the supported Databricks runtime API."""
+    if task_values is None:
+        try:
+            from databricks.sdk.runtime import dbutils
+
+            task_values = dbutils.jobs.taskValues
+        except Exception as error:
+            raise RuntimeError("Databricks task values are required for evaluation handoff") from error
+    try:
+        task_values.set(key="generation_run_id", value=generation_run_id)
+    except Exception as error:
+        raise RuntimeError("failed to publish generation_run_id task value") from error
+
+
+def persist_and_publish_generation(
+    spark: Any, *, target: str, records: list[dict[str, Any]],
+    generation_run_id: str, task_values: Any | None = None,
+) -> None:
+    """Persist a cohort before publishing the exact identity evaluation must use."""
+    persist_summaries(spark, target=target, records=records)
+    publish_generation_run_id(generation_run_id, task_values=task_values)
+
+
 def generate_advisor_summaries(
-    *, catalog: str, schema_prefix: str, cohort_limit: int, endpoint: str = MODEL_ID, max_attempts: int = 3
+    *, catalog: str, schema_prefix: str, cohort_limit: int, endpoint: str = MODEL_ID,
+    max_attempts: int = 3, task_values: Any | None = None,
 ) -> int:
     """Generate a bounded cohort from Gold ``student_detail`` only."""
     _require_endpoint(endpoint)
@@ -456,11 +504,13 @@ def generate_advisor_summaries(
                     generation_run_id=generation_run_id,
                 )
             )
-    persist_summaries(spark, target=target, records=records)
-    try:
-        dbutils.jobs.taskValues.set(key="generation_run_id", value=generation_run_id)
-    except NameError:
-        pass
+    persist_and_publish_generation(
+        spark,
+        target=target,
+        records=records,
+        generation_run_id=generation_run_id,
+        task_values=task_values,
+    )
     return len(records)
 
 

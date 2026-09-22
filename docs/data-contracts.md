@@ -131,7 +131,8 @@ Responses must be a strict JSON object containing `briefing`,
 `model_id`. `briefing` is a non-empty list of `{fact_id, fact_value}` objects:
 each ID and value must exactly equal a supplied allowlisted fact, and
 `citations` must exactly match the selected IDs. The advisor-visible sentences
-are rendered deterministically from those verified values, not from model prose.
+are rendered deterministically from those verified values, not from model prose;
+every factual sentence has its inline `[fact_id]` citation.
 `suggested_action` is an approved action code rendered from a fixed template,
 so it cannot carry unsupported student claims. Accepted responses have no
 unsupported claims. Diagnostic, disciplinary, protected-trait, and

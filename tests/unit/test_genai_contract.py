@@ -28,7 +28,9 @@ from src.genai.generate import (
     failure_summary_record,
     generate_validated_summary,
     parse_model_response,
+    persist_and_publish_generation,
     persist_summaries,
+    publish_generation_run_id,
     render_briefing,
     validate_summary,
 )
@@ -95,8 +97,8 @@ def test_summary_requires_exact_supplied_fact_values_and_renders_them_determinis
 
     accepted = validate_summary(CASES["valid_response"], allowed_facts=payload["facts"])
     assert render_briefing(accepted["briefing"]) == (
-        "Attendance was 58% in the last 28 days. "
-        "4 assignments were missed in the last 28 days."
+        "Attendance was 58% in the last 28 days [attendance_rate_28d]. "
+        "4 assignments were missed in the last 28 days [missed_assignments_28d]."
     )
 
 
@@ -137,6 +139,46 @@ def test_generation_rejects_any_endpoint_other_than_the_approved_model():
     """Model identity cannot drift between the prompt, validation, and endpoint call."""
     with pytest.raises(ValueError, match="databricks-glm-5-3"):
         databricks_completer("another-endpoint")
+
+
+def test_generation_run_id_is_published_through_injectable_task_values():
+    """The job handoff must publish the exact cohort identity or fail loudly."""
+    calls = []
+
+    class FakeTaskValues:
+        def set(self, *, key, value):
+            calls.append((key, value))
+
+    publish_generation_run_id("cohort-123", task_values=FakeTaskValues())
+
+    assert calls == [("generation_run_id", "cohort-123")]
+
+
+def test_generation_finalization_persists_then_publishes_the_same_cohort_id(monkeypatch):
+    """The production job path must hand evaluation the cohort it just persisted."""
+    persisted = []
+    published = []
+
+    import src.genai.generate as generate_module
+    monkeypatch.setattr(
+        generate_module,
+        "persist_summaries",
+        lambda spark, *, target, records: persisted.append((spark, target, records)),
+    )
+    monkeypatch.setattr(
+        generate_module,
+        "publish_generation_run_id",
+        lambda generation_run_id, *, task_values=None: published.append((generation_run_id, task_values)),
+    )
+
+    task_values = object()
+    persist_and_publish_generation(
+        object(), target="catalog.gold.advisor_summaries", records=[{"summary_key": "x"}],
+        generation_run_id="cohort-456", task_values=task_values,
+    )
+
+    assert persisted[0][1] == "catalog.gold.advisor_summaries"
+    assert published == [("cohort-456", task_values)]
 
 
 def test_parser_accepts_one_json_fence_but_rejects_surrounding_prose():
@@ -248,6 +290,44 @@ def test_persist_summaries_uses_explicit_nullable_schema_for_an_all_failure_firs
     assert fields["error_message"].nullable is True
     assert fields["citations"].dataType.elementType.simpleString() == "string"
     assert captured["created"] == "catalog.retention_gold.advisor_summaries"
+
+
+def test_persist_summaries_adds_missing_columns_without_overwriting_old_table():
+    """An existing v1 table gains new contract fields before its first v2 merge."""
+    captured = {}
+
+    class FakeFrame:
+        def drop(self, _column): return self
+        def createOrReplaceTempView(self, name): captured["view"] = name
+
+    class FakeCatalog:
+        def tableExists(self, _target): return True
+
+    class FakeSpark:
+        catalog = FakeCatalog()
+        def createDataFrame(self, _records, schema):
+            captured["schema"] = schema
+            return FakeFrame()
+        def table(self, _target):
+            class OldTable:
+                schema = type("Schema", (), {"fields": [
+                    type("Field", (), {"name": field})()
+                    for field in ("summary_key", "student_id", "feature_as_of", "model_version")
+                ]})()
+            return OldTable()
+        def sql(self, statement):
+            captured.setdefault("sql", []).append(statement)
+
+    persist_summaries(
+        FakeSpark(),
+        target="catalog.retention_gold.advisor_summaries",
+        records=[failure_summary_record(student_id="STU-1", feature_as_of=None, model_version="1", error=RuntimeError("down"))],
+    )
+
+    alter = next(sql for sql in captured["sql"] if "ADD COLUMNS" in sql)
+    assert "generation_run_id STRING" in alter
+    assert "prompt_version STRING" in alter
+    assert any("MERGE INTO" in sql for sql in captured["sql"])
 
 
 def test_evaluation_status_updates_only_the_generated_cohort(monkeypatch):

@@ -412,16 +412,18 @@ def ensure_summary_schema(spark: Any, *, target: str, schema: Any) -> None:
 
 def persist_summaries(spark: Any, *, target: str, records: list[dict[str, Any]]) -> None:
     """Idempotently persist a prompt-versioned summary status table."""
+    schema = _summary_schema()
+    exists = spark.catalog.tableExists(target)
+    if not exists:
+        # Create the usable current contract even when a bounded cohort is empty.
+        spark.createDataFrame([], schema=schema).limit(0).write.format("delta").saveAsTable(target)
+    else:
+        ensure_summary_schema(spark, target=target, schema=schema)
     if not records:
         return
     # ``risk_score`` is intentionally dropped: summaries cannot overwrite,
     # re-score, or become a source of truth for the governed risk product.
-    schema = _summary_schema()
     frame = spark.createDataFrame(records, schema=schema).drop("risk_score")
-    if not spark.catalog.tableExists(target):
-        frame.limit(0).write.format("delta").saveAsTable(target)
-    else:
-        ensure_summary_schema(spark, target=target, schema=schema)
     frame.createOrReplaceTempView("_advisor_summary_upserts")
     spark.sql(
         f"""

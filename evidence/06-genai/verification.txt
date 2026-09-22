@@ -18,6 +18,16 @@ Bundle validation:
 DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
 Result: Validation OK.
 
+Fix round 3 local regression verification:
+pytest tests/unit/test_genai_contract.py -v
+Result: 23 passed in 1.34s.
+
+pytest -v
+Result: 103 passed in 1.42s.
+
+DATABRICKS_AUTH_STORAGE=plaintext databricks bundle validate --strict -t dev --profile fe-bar
+Result: Validation OK.
+
 Fix round 2 local regression verification:
 pytest tests/unit/test_genai_contract.py -v
 Result: 21 passed in 1.30s.

@@ -330,6 +330,61 @@ def test_persist_summaries_adds_missing_columns_without_overwriting_old_table():
     assert any("MERGE INTO" in sql for sql in captured["sql"])
 
 
+def test_empty_records_migrate_an_existing_v1_summary_table_before_returning():
+    """An empty generated cohort must not skip the required v1-to-v2 migration."""
+    captured = {}
+
+    class FakeCatalog:
+        def tableExists(self, _target): return True
+
+    class FakeSpark:
+        catalog = FakeCatalog()
+        def table(self, _target):
+            class OldTable:
+                schema = type("Schema", (), {"fields": [
+                    type("Field", (), {"name": "summary_key"})(),
+                ]})()
+            return OldTable()
+        def sql(self, statement): captured.setdefault("sql", []).append(statement)
+
+    persist_summaries(
+        FakeSpark(), target="catalog.retention_gold.advisor_summaries", records=[]
+    )
+
+    alter = next(sql for sql in captured["sql"] if "ADD COLUMNS" in sql)
+    assert "generation_run_id STRING" in alter
+
+
+def test_empty_first_cohort_creates_a_current_schema_summary_table():
+    """Downstream evaluation can safely inspect an empty first generation run."""
+    captured = {}
+
+    class FakeFrame:
+        def limit(self, _count): return self
+        @property
+        def write(self): return self
+        def format(self, _format): return self
+        def saveAsTable(self, target): captured["created"] = target
+
+    class FakeCatalog:
+        def tableExists(self, _target): return False
+
+    class FakeSpark:
+        catalog = FakeCatalog()
+        def createDataFrame(self, records, schema):
+            captured["records"] = records
+            captured["schema"] = schema
+            return FakeFrame()
+
+    persist_summaries(
+        FakeSpark(), target="catalog.retention_gold.advisor_summaries", records=[]
+    )
+
+    assert captured["records"] == []
+    assert "generation_run_id" in {field.name for field in captured["schema"].fields}
+    assert captured["created"] == "catalog.retention_gold.advisor_summaries"
+
+
 def test_evaluation_status_updates_only_the_generated_cohort(monkeypatch):
     """A later evaluation must never publish historical rows sharing a prompt version."""
     captured = {}

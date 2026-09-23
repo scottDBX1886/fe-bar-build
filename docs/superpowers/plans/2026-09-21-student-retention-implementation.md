@@ -441,23 +441,23 @@ Save before/after queries and CDC reconstruction checks to `evidence/08-interven
 - Consumes: Approved aggregate and advisor-scoped Gold views plus the selected SQL warehouse.
 - Produces: Curated Genie Agent ID and benchmark transcripts for app embedding.
 
-- [ ] **Step 1: Profile and approve Genie data sources**
+- [x] **Step 1: Profile and approve Genie data sources**
 
 Discover every candidate Gold table, verify descriptions and dimensions, and confirm that protected attributes and unrestricted student records are absent. Use aggregate sources for executive questions and governed advisor views for student-level questions.
 
-- [ ] **Step 2: Define the serialized Agent configuration**
+- [x] **Step 2: Define the serialized Agent configuration**
 
 Include explicit table identifiers, business definitions, join guidance, time semantics, metric formulas, disallowed interpretations, and sample questions. Questions must include risk concentration, intervention coverage, follow-up backlog, program trends, and estimated tuition exposure with its synthetic-estimate caveat.
 
-- [ ] **Step 3: Write benchmark tests before Agent creation**
+- [x] **Step 3: Write benchmark tests before Agent creation**
 
 Define expected tables, required filters, forbidden columns, and answer assertions for at least 12 questions. Include empty, ambiguous, and permission-denied cases.
 
-- [ ] **Step 4: Create, query, and refine the Agent**
+- [x] **Step 4: Create, query, and refine the Agent**
 
 Create the Genie Agent only after the configuration review. Run every benchmark through the Conversation API, poll completion, inspect generated SQL, and revise instructions until all safety and correctness gates pass.
 
-- [ ] **Step 5: Capture evidence, walk through, and commit**
+- [x] **Step 5: Capture evidence, walk through, and commit**
 
 Save questions, generated SQL, sanitized answers, and benchmark summary to `evidence/09-genie/`. Commit with `feat: add governed retention genie agent`.
 

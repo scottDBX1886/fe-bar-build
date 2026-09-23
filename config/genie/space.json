@@ -1,0 +1,112 @@
+{
+  "version": 2,
+  "config": {
+    "sample_questions": [
+      {"id": "10000000000000000000000000000001", "question": ["Where is current risk concentration highest by program?"]},
+      {"id": "10000000000000000000000000000002", "question": ["What is intervention coverage by program and risk tier?"]},
+      {"id": "10000000000000000000000000000003", "question": ["What is my current follow-up backlog?"]},
+      {"id": "10000000000000000000000000000004", "question": ["Show program trends in average risk score by score date."]},
+      {"id": "10000000000000000000000000000005", "question": ["What is estimated next-term net tuition exposure by program?"]}
+    ]
+  },
+  "data_sources": {
+    "tables": [
+      {
+        "identifier": "serverless_stable_febar_scottj_catalog.student_retention_gold.advisor_caseload",
+        "column_configs": [
+          {"column_name": "advisor_id", "description": ["Assigned advisor identifier; access is enforced by the table row filter."], "exclude": true},
+          {"column_name": "caseload_priority", "description": ["Deterministic rank within the advisor caseload; 1 is highest risk."], "synonyms": ["priority rank"]},
+          {"column_name": "cohort_code", "description": ["Entry cohort code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "first_intervention_at", "description": ["Timestamp of the student's earliest current intervention."]},
+          {"column_name": "follow_up_completed", "description": ["True when a scheduled follow-up has a subsequent closed event."]},
+          {"column_name": "follow_up_due", "description": ["True when an open intervention has reached its next follow-up timestamp."], "synonyms": ["follow-up backlog", "overdue follow-up"]},
+          {"column_name": "intervention_priority", "description": ["Operational priority assigned to the selected current intervention."], "enable_entity_matching": true},
+          {"column_name": "intervention_status", "description": ["Current intervention status; not_started means no current intervention."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "leading_factors", "description": ["Model feature names associated with the risk score; explanatory signals, not causal claims."]},
+          {"column_name": "program_code", "description": ["Academic program code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "risk_score", "description": ["Model-produced stopout risk score from 0 to 1; interventions do not modify it."], "synonyms": ["stopout score"]},
+          {"column_name": "risk_tier", "description": ["Operational tier derived from risk score: low, medium, or high."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "score_date", "description": ["Calendar date of the risk score."]},
+          {"column_name": "scored_at", "description": ["Timestamp when the model score was produced."], "exclude": true},
+          {"column_name": "student_id", "description": ["Synthetic student identifier visible only through advisor row-level access."], "enable_entity_matching": true},
+          {"column_name": "term_code", "description": ["Academic term code."], "enable_entity_matching": true, "enable_format_assistance": true}
+        ]
+      },
+      {
+        "identifier": "serverless_stable_febar_scottj_catalog.student_retention_gold.executive_retention_metrics",
+        "column_configs": [
+          {"column_name": "at_risk_count", "description": ["Count of medium- and high-risk students in this aggregate row."], "synonyms": ["elevated risk count"]},
+          {"column_name": "cohort_code", "description": ["Entry cohort code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "data_freshness_at", "description": ["Most recent score timestamp represented by this row."]},
+          {"column_name": "estimated_next_term_net_tuition_exposure", "description": ["Synthetic estimate of next-term net tuition associated with medium- and high-risk students; always label it as an estimate."], "synonyms": ["tuition exposure"]},
+          {"column_name": "follow_up_completion_rate", "description": ["Share of due follow-ups completed in this row; null means no eligible due follow-ups."]},
+          {"column_name": "intervention_coverage", "description": ["Share of medium- and high-risk students with a current or completed intervention in this row; null means no elevated-risk denominator."]},
+          {"column_name": "intervention_status", "description": ["Intervention status dimension."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "program_code", "description": ["Academic program code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "retention_rate", "description": ["Share of observed outcomes that are persisted or retained in this aggregate row."]},
+          {"column_name": "risk_tier", "description": ["Risk tier dimension: low, medium, or high."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "score_date", "description": ["Calendar date of the risk score."]},
+          {"column_name": "student_count", "description": ["Distinct student count represented by this aggregate row."]},
+          {"column_name": "term_code", "description": ["Academic term code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "time_to_first_intervention_days", "description": ["Average days from scoring to first intervention for contacted students in this exact row; do not average across rows."]},
+          {"column_name": "tuition_exposure_is_estimate", "description": ["Always true; confirms tuition exposure is a synthetic estimate."], "exclude": true}
+        ]
+      },
+      {
+        "identifier": "serverless_stable_febar_scottj_catalog.student_retention_gold.genie_retention",
+        "column_configs": [
+          {"column_name": "advisor_id", "description": ["Assigned advisor identifier; access is enforced by the table row filter."], "exclude": true},
+          {"column_name": "cohort_code", "description": ["Entry cohort code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "follow_up_completed", "description": ["True when a scheduled follow-up has a subsequent closed event."]},
+          {"column_name": "follow_up_due", "description": ["True when an open intervention has reached its next follow-up timestamp."]},
+          {"column_name": "intervention_priority", "description": ["Operational priority assigned to the selected current intervention."], "enable_entity_matching": true},
+          {"column_name": "intervention_status", "description": ["Current intervention status; not_started means no current intervention."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "leading_factors", "description": ["Model feature names associated with risk; explanatory signals, not causal claims."]},
+          {"column_name": "outcome_status", "description": ["Observed synthetic retention outcome."], "enable_entity_matching": true},
+          {"column_name": "program_code", "description": ["Academic program code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "risk_score", "description": ["Model-produced stopout risk score from 0 to 1."], "synonyms": ["stopout score"]},
+          {"column_name": "risk_tier", "description": ["Operational tier derived from risk score."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "score_date", "description": ["Calendar date of the risk score."]},
+          {"column_name": "student_id", "description": ["Synthetic student identifier visible only through advisor row-level access."], "enable_entity_matching": true},
+          {"column_name": "term_code", "description": ["Academic term code."], "enable_entity_matching": true, "enable_format_assistance": true}
+        ]
+      },
+      {
+        "identifier": "serverless_stable_febar_scottj_catalog.student_retention_gold.risk_trends",
+        "column_configs": [
+          {"column_name": "average_risk_score", "description": ["Average model risk score in this aggregate row; use student_count for weighted rollups."]},
+          {"column_name": "cohort_code", "description": ["Entry cohort code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "intervention_status", "description": ["Intervention status dimension."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "maximum_risk_score", "description": ["Maximum risk score in this aggregate row."]},
+          {"column_name": "minimum_risk_score", "description": ["Minimum risk score in this aggregate row."]},
+          {"column_name": "program_code", "description": ["Academic program code."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "risk_tier", "description": ["Risk tier dimension."], "enable_entity_matching": true, "enable_format_assistance": true},
+          {"column_name": "score_date", "description": ["Calendar date of the risk score."]},
+          {"column_name": "student_count", "description": ["Distinct student count represented by this aggregate row."]},
+          {"column_name": "term_code", "description": ["Academic term code."], "enable_entity_matching": true, "enable_format_assistance": true}
+        ]
+      }
+    ]
+  },
+  "instructions": {
+    "example_question_sqls": [
+      {"id": "20000000000000000000000000000001", "question": ["Where is risk concentration highest by program?"], "sql": ["SELECT risk_trends.program_code, SUM(risk_trends.student_count) AS elevated_risk_students FROM serverless_stable_febar_scottj_catalog.student_retention_gold.risk_trends AS risk_trends WHERE risk_trends.risk_tier IN ('medium', 'high') GROUP BY risk_trends.program_code ORDER BY elevated_risk_students DESC"]},
+      {"id": "20000000000000000000000000000002", "question": ["What is intervention coverage by program?"], "sql": ["SELECT executive_retention_metrics.program_code, SUM(executive_retention_metrics.intervention_coverage * executive_retention_metrics.at_risk_count) / NULLIF(SUM(executive_retention_metrics.at_risk_count), 0) AS intervention_coverage FROM serverless_stable_febar_scottj_catalog.student_retention_gold.executive_retention_metrics AS executive_retention_metrics WHERE executive_retention_metrics.risk_tier IN ('medium', 'high') GROUP BY executive_retention_metrics.program_code ORDER BY intervention_coverage DESC"]},
+      {"id": "20000000000000000000000000000003", "question": ["What is my follow-up backlog?"], "sql": ["SELECT advisor_caseload.student_id, advisor_caseload.program_code, advisor_caseload.risk_tier, advisor_caseload.intervention_priority, advisor_caseload.caseload_priority FROM serverless_stable_febar_scottj_catalog.student_retention_gold.advisor_caseload AS advisor_caseload WHERE advisor_caseload.follow_up_due = true ORDER BY advisor_caseload.caseload_priority"]},
+      {"id": "20000000000000000000000000000004", "question": ["Show program risk trends."], "sql": ["SELECT risk_trends.score_date, risk_trends.program_code, SUM(risk_trends.average_risk_score * risk_trends.student_count) / NULLIF(SUM(risk_trends.student_count), 0) AS weighted_average_risk_score FROM serverless_stable_febar_scottj_catalog.student_retention_gold.risk_trends AS risk_trends GROUP BY risk_trends.score_date, risk_trends.program_code ORDER BY risk_trends.score_date, risk_trends.program_code"]},
+      {"id": "20000000000000000000000000000005", "question": ["What is estimated tuition exposure by program?"], "sql": ["SELECT executive_retention_metrics.program_code, SUM(executive_retention_metrics.estimated_next_term_net_tuition_exposure) AS estimated_next_term_net_tuition_exposure FROM serverless_stable_febar_scottj_catalog.student_retention_gold.executive_retention_metrics AS executive_retention_metrics GROUP BY executive_retention_metrics.program_code ORDER BY estimated_next_term_net_tuition_exposure DESC"]}
+    ],
+    "text_instructions": [
+      {
+        "id": "30000000000000000000000000000001",
+        "content": [
+          "## PURPOSE\n- Answer retention-risk and intervention questions for executives and advisors using only the attached governed Gold sources.",
+          "## DISAMBIGUATION\n- Ask for clarification when a request for student-level help does not identify whether the user wants their caseload, a program, or a risk tier.\n- Use calendar dates from score_date; do not infer fiscal periods.",
+          "## DATA QUALITY NOTES\n- A null follow_up_completion_rate means no eligible due follow-ups, not zero performance.\n- leading_factors are model signals and do not establish causality.",
+          "## CONSTRAINTS\n- Never infer, request, or expose protected demographic attributes; they are intentionally absent.\n- Respect row filters on advisor_caseload and genie_retention and never claim access beyond returned rows.\n- Do not join aggregate tables to student-level tables because that duplicates measures.",
+          "## Instructions you must follow when providing summaries\n- Always label estimated_next_term_net_tuition_exposure as a synthetic estimate, not realized or forecast revenue.\n- State the score_date represented and distinguish model risk from observed outcomes.\n- Use weighted formulas from the certified examples when rolling aggregate rates or average scores across rows."
+        ]
+      }
+    ]
+  }
+}

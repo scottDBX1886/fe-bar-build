@@ -62,7 +62,7 @@ host = https://dev-workspace.cloud.databricks.com
 [production]
 host = https://prod-workspace.cloud.databricks.com
 client_id = prod-client-id
-client_secret = prod-client-secret
+client_secret = ${DATABRICKS_CLIENT_SECRET}
 ```
 
 Deploy using a specific profile:

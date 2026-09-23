@@ -21,5 +21,5 @@ export function describeGenieState(status: string, messageCount: number, error: 
 }
 
 export function isAmbiguousAnswer(message: TrustMessage | undefined) {
-  return message?.role === 'assistant' && !message.content?.trim() && !(message.attachments?.length);
+  return message?.role === 'assistant' && !message.content?.trim() && !message.attachments?.length;
 }

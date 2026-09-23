@@ -1,0 +1,47 @@
+Task 15 final verification — 2026-09-23
+
+Repository and sanitizer
+- Evidence sanitizer/index tests: 5 passed
+- Full Python suite: 132 passed, 5 environment-gated skips
+- Evidence capture and secret-pattern scan: passed
+- Evidence domains represented as text: 12 of 12
+
+Databricks App
+- Vitest: 16 passed
+- TypeScript typecheck: passed
+- ESLint: passed
+- Prettier: passed after repository formatting
+- Production server/client build: passed
+- Deployed app: RUNNING; compute ACTIVE; deployment SUCCEEDED
+- Authenticated Playwright/CDP smoke:
+  - Executive Overview: passed
+  - Advisor Caseload navigation: passed
+  - Advisor Caseload browser refresh: passed
+  - Embedded Genie trust state: passed
+  - Console errors after checks: none
+
+Databricks platform
+- Strict bundle validation: passed
+- Daily workflow job 666694306037627, run 961267010710573: TERMINATED/SUCCESS
+- Existing-model scoring: SUCCESS; routine training branch: EXCLUDED as intended
+- GenAI generation and evaluation tasks: SUCCESS
+- Serving-sync workflow check: SUCCESS
+- Intervention Gold refresh: SUCCESS
+- Executive metric synchronized table: SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+- Risk trends synchronized table: SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE
+
+Existing domain-specific evidence
+- ML evaluation, registry, and score-contract evidence: evidence/04-ml/
+- Governance and row-policy evidence: evidence/05-gold-governance/
+- GenAI fixed-set evaluation: evidence/06-genai/
+- Lakebase transactions and read-only serving checks: evidence/07-lakebase/
+- Intervention CDC and Gold verification: evidence/08-intervention-gold/
+- Genie governed benchmark and SQL: evidence/09-genie/ and evidence/11-app-genie/
+- Idempotent deployed workflow: evidence/12-daily-workflow/
+
+Presentation
+- Official Databricks-template PowerPoint: docs/presentation/student-retention.pptx
+- Portable rendered deck: docs/presentation/student-retention.pdf
+- Outcome-led narrative source: docs/presentation/student-retention.md
+- Structural validation: 12 slides; no known template placeholders; synthetic-data disclosure present
+- Visual QA: all 12 rendered pages inspected; architecture formatting corrected; no observed clipping or overflow

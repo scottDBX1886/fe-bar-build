@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test';
 const appUrl = process.env.APP_URL ?? 'http://127.0.0.1:8000';
 
 test('retention advisor shell exposes its governed workflows', async ({ page }) => {
+  const token = process.env.DATABRICKS_TOKEN;
+  if (token) {
+    await page.setExtraHTTPHeaders({ Authorization: `Bearer ${token}` });
+  }
   await page.goto(appUrl);
 
   await expect(page.getByRole('banner')).toBeVisible();

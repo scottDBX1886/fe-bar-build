@@ -1,0 +1,95 @@
+[
+  {
+    "layout": "title",
+    "title": "From Fragmented Signals to Timely Student Support",
+    "body": "A governed student-retention workflow on Databricks\nPublic Sector • Higher Education • Synthetic demonstration"
+  },
+  {
+    "layout": "power_statement",
+    "title": "Advisors need to know who needs attention today—and why—without compromising trust."
+  },
+  {
+    "layout": "card_quad",
+    "title": "Buyer KPIs and synthetic demo baseline",
+    "columns": [
+      "88.88%\nSynthetic retention rate",
+      "2,664\nInitially elevated-risk students",
+      "$24.1M\nEstimated synthetic tuition exposure",
+      "20,000\nCurrent synthetic students"
+    ]
+  },
+  {
+    "layout": "cards_3col",
+    "title": "Current-state friction delays action",
+    "columns": [
+      "Fragmented signals",
+      "Attendance, LMS, finance, enrollment, and case data arrive on different clocks.",
+      "Inconsistent prioritization",
+      "Advisors reconcile data manually and lack a defensible daily queue.",
+      "Weak feedback loop",
+      "Outreach and outcomes are disconnected from executive coverage and analytics."
+    ]
+  },
+  {
+    "layout": "content_basic",
+    "title": "A closed-loop workflow from signal to action",
+    "body": "1. Observe — trigger one deterministic synthetic day\n2. Govern — apply quality, lineage, grants, and row filters\n3. Prioritize — score current snapshots with a versioned ML model\n4. Assist — generate cited, evaluated advisor briefings\n5. Act — record interventions transactionally in Lakebase\n6. Learn — return CDC to governed Gold\n7. Understand — ask embedded Genie and inspect its SQL"
+  },
+  {
+    "layout": "content_2col",
+    "title": "Business value for two accountable owners",
+    "columns": [
+      "Executive sponsor",
+      "See aggregate risk concentration, intervention coverage, retention, and estimated tuition exposure—without student detail.",
+      "Student-success owner",
+      "Reduce signal-to-outreach time with a prioritized caseload, grounded context, and closed-loop follow-up history."
+    ]
+  },
+  {
+    "layout": "content_basic",
+    "title": "Governed Databricks architecture",
+    "body": "Synthetic SIS / LMS / attendance / finance\n↓\nLakeflow Bronze → Silver → MLflow scoring → Unity Catalog Gold\n↓                                      ↓\nRead-only Lakebase serving        Curated Genie Agent\n              ↘                  ↙\n                  Databricks App\n                        ↓\n         Lakebase-owned interventions\n                        ↓ CDC\n          Unity Catalog intervention Gold\n\nServing refreshes cannot overwrite advisor transactions."
+  },
+  {
+    "layout": "cards_3col",
+    "title": "Hybrid intelligence keeps each decision explainable",
+    "columns": [
+      "ML classifier",
+      "Repeatable prioritization, calibrated scores, stable tiers, version history, and baseline comparison.",
+      "Grounded GenAI",
+      "Allowlisted facts, citations, bounded discussion prompts, and fixed-set evaluation.",
+      "Human advisor",
+      "Judgment, outreach, reconciliation, and accountable action remain with people."
+    ]
+  },
+  {
+    "layout": "content_basic",
+    "title": "Live demo: one coherent student-success story",
+    "body": "Replay the September 23 synthetic incident day\nInspect quality and feature freshness\nShow a medium-to-high risk transition\nReview the governed caseload and cited briefing\nRecord outreach and a follow-up\nVerify Lakebase CDC and intervention Gold\nView aggregate executive coverage\nAsk embedded Genie and inspect generated SQL"
+  },
+  {
+    "layout": "card_quad",
+    "title": "Execution evidence—not screenshots",
+    "columns": [
+      "60,000\nImmutable daily risk-history rows",
+      "0.9669\nSynthetic validation PR-AUC",
+      "SUCCESS\nFull workflow and idempotent replay",
+      "ONLINE\nBoth serving sync tables"
+    ]
+  },
+  {
+    "layout": "content_2col",
+    "title": "Trust is designed in—and limitations stay visible",
+    "columns": [
+      "Trust controls",
+      "Row-filtered advisor access\nAggregate-only executive products\nRead-only serving tables\nCited AI and inspectable SQL\nVisible stale, partial, and error states",
+      "Honest boundaries",
+      "Synthetic data and designed signals\nNo causal impact claim\nNo automated adverse action\nNo institutional validation yet\nTriggered daily—not real time"
+    ]
+  },
+  {
+    "layout": "closing",
+    "title": "Pilot the workflow—not just the model",
+    "body": "Align owners • validate institutional data and thresholds • measure signal-to-outreach time and intervention coverage"
+  }
+]

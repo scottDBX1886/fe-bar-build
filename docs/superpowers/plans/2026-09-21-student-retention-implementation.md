@@ -625,27 +625,27 @@ Save structured task outputs and before/after SQL to `evidence/12-daily-workflow
 - Consumes: Successful deployed build and evidence from Tasks 2–14.
 - Produces: Evaluator-readable repository, repeatable demo, and business-facing presentation source.
 
-- [ ] **Step 1: Write failing sanitizer tests**
+- [x] **Step 1: Write failing sanitizer tests**
 
 Test redaction of access tokens, OAuth credentials, workspace secrets, email-like test identities where required, and connection strings while preserving query results, model metrics, and resource IDs needed as evidence.
 
-- [ ] **Step 2: Implement evidence capture and index**
+- [x] **Step 2: Implement evidence capture and index**
 
 Create a deterministic evidence index mapping every acceptance criterion to a text file, reproduction command, capture timestamp, selected workspace resource, and expected interpretation. Fail capture when secret-pattern scanning detects unsafe content.
 
-- [ ] **Step 3: Write the demo runbook**
+- [x] **Step 3: Write the demo runbook**
 
 Script the exact narrative: ingest the incident day, inspect quality, observe risk movement, review grounded assistance, record outreach, verify CDC in Gold, view aggregate executive change, and ask Genie a governed question. Include recovery guidance and expected outputs at each checkpoint.
 
-- [ ] **Step 4: Write the business presentation**
+- [x] **Step 4: Write the business presentation**
 
 Lead with the retention problem and buyer KPIs, then current-state friction, solution workflow, business value, governed architecture, live demo story, evidence, limitations, and next steps. Clearly mark all metrics and financial values as synthetic.
 
-- [ ] **Step 5: Run the final verification suite**
+- [x] **Step 5: Run the final verification suite**
 
 Run all Python, TypeScript, Vitest, Playwright, bundle validation, deployed workflow, policy tests, ML/GenAI evaluation, sync checks, and evidence secret scanning. Verify that the repository contains text—not screenshots alone—for every build domain.
 
-- [ ] **Step 6: Perform the final demo and commit**
+- [x] **Step 6: Perform the final demo and commit**
 
 Execute the demo runbook without manual data repair. Record duration, deviations, and final evidence links. Commit with `docs: add retention demo evidence and presentation`.
 

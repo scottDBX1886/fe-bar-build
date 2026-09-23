@@ -1,0 +1,24 @@
+Task 11 verification record
+Date: 2026-09-23
+Databricks profile: fe-bar
+App: dev-student-retention
+Deployment: 01f1b77e9cb2178fb61ad8a9aced5048
+URL: https://dev-student-retention-7474646471228909.aws.databricksapps.com
+
+AppKit validation: PASSED
+TypeScript: PASSED
+ESLint: PASSED
+AppKit AST lint: PASSED
+Production build: PASSED
+Strict bundle validation: PASSED
+Databricks deployment: SUCCEEDED
+App state: RUNNING
+Compute state: ACTIVE
+SQL warehouse resource attached: YES
+Lakebase resource attached: YES
+Genie resource attached: YES
+dashboards.genie OBO scope effective: YES
+Lakebase student_retention_app schema available: YES
+
+Browser test dependency shipped to runtime: NO (intentional)
+Smoke navigation contract: app/tests/smoke.spec.ts

@@ -476,27 +476,27 @@ Save questions, generated SQL, sanitized answers, and benchmark summary to `evid
 - Consumes: Lakebase resources, SQL warehouse, Genie Agent, and app permissions.
 - Produces: Deployable application shell with Analytics, Lakebase, and Genie plugins.
 
-- [ ] **Step 1: Inspect the current AppKit manifest**
+- [x] **Step 1: Inspect the current AppKit manifest**
 
 Run `databricks apps manifest` with the selected profile. Merge and report all template/plugin scaffolding rules. Derive exact feature and resource keys from the manifest; do not guess them.
 
-- [ ] **Step 2: Scaffold with all required capabilities**
+- [x] **Step 2: Scaffold with all required capabilities**
 
 Use AppKit with Analytics for aggregate SQL, Lakebase for operational serving/write-back, and Genie for embedded chat. Supply the exact selected warehouse, branch/database resource paths, and Genie Agent resource. Use `--run none` so generated code can be reviewed before execution.
 
-- [ ] **Step 3: Wire deployment identity and APIs**
+- [x] **Step 3: Wire deployment identity and APIs**
 
 Register `analytics()`, `lakebase`, and `genie()` using the installed AppKit signatures. Add `/api/whoami` using `x-forwarded-email` and `x-forwarded-user`. Configure `user_api_scopes: [dashboards.genie]` and truthfully display whether queries run OBO or as the service principal.
 
-- [ ] **Step 4: Write shell smoke tests first**
+- [x] **Step 4: Write shell smoke tests first**
 
 Update Playwright selectors to require the navigation, authenticated identity badge, Executive Overview heading, Advisor Caseload heading, and Ask Genie entry. Keep smoke-test data below the 1 MB analytics-event limit.
 
-- [ ] **Step 5: Validate and deploy the empty shell**
+- [x] **Step 5: Validate and deploy the empty shell**
 
 Run TypeScript checks, shell smoke tests, and `databricks apps validate`. Deploy before local Lakebase development so the service principal creates and owns its app schema. Analytics query type generation happens in Task 12 after its query files are defined.
 
-- [ ] **Step 6: Walk through and commit**
+- [x] **Step 6: Walk through and commit**
 
 Explain the three data-access paths and why each exists. Commit with `feat: scaffold retention advisor app`.
 

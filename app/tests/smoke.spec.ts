@@ -15,4 +15,6 @@ test('retention advisor shell exposes its governed workflows', async ({ page }) 
   await page.getByRole('link', { name: 'Ask Genie' }).click();
   await expect(page.getByRole('heading', { name: 'Ask Genie' })).toBeVisible();
   await expect(page.getByText('Runs with your Databricks permissions', { exact: true })).toBeVisible();
+  await expect(page.getByText(/AI-generated.*verify/i)).toBeVisible();
+  await expect(page.getByPlaceholder('Ask about student retention')).toBeVisible();
 });

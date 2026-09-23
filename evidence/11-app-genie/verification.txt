@@ -1,0 +1,24 @@
+Task 13 verification — 2026-09-23
+
+App validation:
+  databricks apps validate --profile fe-bar: PASS
+
+Genie trust tests:
+  Test Files  3 passed (3)
+  Tests       16 passed (16)
+
+Static checks:
+  npm run typecheck: PASS
+  npm run lint: PASS
+  npm run lint:ast-grep: PASS
+
+Benchmark prompts:
+  Current program risk: COMPLETED, generated SQL present, approved Gold source
+  Intervention coverage by date: COMPLETED, generated SQL present, approved Gold source
+
+Deployment:
+  deployment_id: 01f1b784971b12948841023a12ec9b65
+  deployment_state: SUCCEEDED
+  app_state: RUNNING
+  compute_state: ACTIVE
+  effective_user_api_scopes: dashboards.genie, sql

@@ -560,19 +560,19 @@ Save test output and sanitized API/query results to `evidence/10-app-workflows/`
 - Consumes: AppKit Genie plugin, authenticated identity, and curated Genie Agent.
 - Produces: In-app natural-language analysis with complete trust and governance indicators.
 
-- [ ] **Step 1: Write failing Genie trust tests**
+- [x] **Step 1: Write failing Genie trust tests**
 
 Require identity badge, truthful OBO/service-principal disclosure, streaming status, error state, generated SQL card, source/result attachments, per-answer AI verification notice, and explicit empty/ambiguous state.
 
-- [ ] **Step 2: Implement with supported AppKit components**
+- [x] **Step 2: Implement with supported AppKit components**
 
 Use `GenieChat` for the standard experience or `useGenieChat` only if the trust requirements need a custom result layout. Give the container an explicit height and remove any custom/manual SSE proxy.
 
-- [ ] **Step 3: Verify governance end to end**
+- [x] **Step 3: Verify governance end to end**
 
 Run benchmark prompts from the embedded page. Confirm generated SQL matches the curated sources and the signed-in user's access. Confirm an executive cannot retrieve student-level rows and an advisor cannot retrieve another advisor's caseload.
 
-- [ ] **Step 4: Capture evidence, walk through, and commit**
+- [x] **Step 4: Capture evidence, walk through, and commit**
 
 Save sanitized embedded-chat transcripts, generated SQL, and test output to `evidence/11-app-genie/`. Commit with `feat: embed trusted genie experience`.
 

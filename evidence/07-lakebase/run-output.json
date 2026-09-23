@@ -18,8 +18,25 @@
     "result_version": 1
   },
   "serving_sync": {
-    "status": "blocked",
-    "reason": "Selected identity lacks CREATE CATALOG on the metastore",
-    "pending_catalog": "student_retention_lakebase"
+    "status": "online",
+    "scheduling_policy": "SNAPSHOT",
+    "executive_retention_metrics_state": "SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE",
+    "risk_trends_state": "SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE",
+    "postgres_schema": "student_retention_gold",
+    "row_counts": {
+      "serving_executive_retention_metrics": 15,
+      "serving_risk_trends": 15
+    },
+    "reader_privileges": {
+      "select": true,
+      "insert": false,
+      "update": false,
+      "delete": false
+    },
+    "overwrite_protection": {
+      "student_id": "STU-TASK8-ROUNDTRIP",
+      "status_after_serving_snapshots": "open",
+      "version_after_serving_snapshots": 1
+    }
   }
 }

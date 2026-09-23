@@ -13,7 +13,6 @@ from typing import Mapping
 class SyncPlan:
     catalog: str
     uc_cdc_schema: str
-    lakebase_catalog: str
     branch: str
     database: str
     postgres_database: str
@@ -33,24 +32,22 @@ class SyncPlan:
 
 
 def build_sync_plan(
-    *, catalog: str, schema_prefix: str, lakebase_catalog: str,
-    branch: str, database: str,
+    *, catalog: str, schema_prefix: str, branch: str, database: str,
 ) -> SyncPlan:
-    serving_schema = f"{schema_prefix}_serving"
+    serving_schema = f"{schema_prefix}_gold"
     gold = f"{catalog}.{schema_prefix}_gold"
     return SyncPlan(
         catalog=catalog,
         uc_cdc_schema=f"{schema_prefix}_cdc",
-        lakebase_catalog=lakebase_catalog,
         branch=branch,
         database=database,
         postgres_database="databricks_postgres",
         postgres_serving_schema=serving_schema,
         postgres_write_schema=f"{schema_prefix}_app",
         serving_syncs={
-            f"{lakebase_catalog}.{serving_schema}.executive_retention_metrics":
+            f"{catalog}.{serving_schema}.serving_executive_retention_metrics":
                 f"{gold}.executive_retention_metrics",
-            f"{lakebase_catalog}.{serving_schema}.risk_trends":
+            f"{catalog}.{serving_schema}.serving_risk_trends":
                 f"{gold}.risk_trends",
         },
     )
@@ -85,7 +82,7 @@ def configure(plan: SyncPlan, *, profile: str) -> None:
             "spec": {
                 "source_table_full_name": source,
                 "primary_key_columns": _primary_keys(target),
-                "scheduling_policy": "TRIGGERED",
+                "scheduling_policy": "SNAPSHOT",
                 "branch": plan.branch,
                 "postgres_database": plan.postgres_database,
                 "create_database_objects_if_missing": True,
@@ -122,12 +119,12 @@ def configure(plan: SyncPlan, *, profile: str) -> None:
 
 def _primary_keys(target: str) -> list[str]:
     table = target.rsplit(".", 1)[-1]
-    if table == "executive_retention_metrics":
+    if table == "serving_executive_retention_metrics":
         return [
             "program_code", "cohort_code", "term_code", "score_date",
             "risk_tier", "intervention_status",
         ]
-    if table == "risk_trends":
+    if table == "serving_risk_trends":
         return [
             "program_code", "cohort_code", "term_code", "score_date",
             "risk_tier", "intervention_status",
@@ -139,7 +136,6 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema-prefix", required=True)
-    parser.add_argument("--lakebase-catalog", required=True)
     parser.add_argument("--branch", required=True)
     parser.add_argument("--database", required=True)
     parser.add_argument("--profile", required=True)
@@ -148,7 +144,6 @@ def main() -> None:
     plan = build_sync_plan(
         catalog=args.catalog,
         schema_prefix=args.schema_prefix,
-        lakebase_catalog=args.lakebase_catalog,
         branch=args.branch,
         database=args.database,
     )

@@ -14,5 +14,18 @@
       "result_version": 1
     }
   ],
+  "serving_sync": {
+    "states": [
+      "SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE",
+      "SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE"
+    ],
+    "row_counts": [15, 15],
+    "reader_privileges_select_insert_update_delete": [true, false, false, false],
+    "retained_intervention": {
+      "student_id": "STU-TASK8-ROUNDTRIP",
+      "status": "open",
+      "version": 1
+    }
+  },
   "type_mapping_note": "Postgres UUID values are represented as BINARY in Unity Catalog CDC history."
 }

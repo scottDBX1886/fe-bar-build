@@ -386,15 +386,15 @@ Create `interventions` with an integer version and audit timestamps, and immutab
 
 Each state-transition test must update `interventions` with `WHERE version = expected_version` and append the corresponding event in the same transaction. Define the result contract later used by the application repository: conflict when no matching version is updated and the prior successful result for a repeated idempotency key.
 
-- [ ] **Step 5: Configure both one-way syncs without a loop**
+- [x] **Step 5: Configure both one-way syncs without a loop**
 
-Enable CDF on the UC Gold serving source and create triggered UC-to-Lakebase synchronized tables. Configure schema-level Lakehouse Sync from the app-owned Postgres schema into the selected UC CDC schema. Verify the two paths use distinct source and destination objects.
+Create snapshot UC-to-Lakebase synchronized tables for the Gold materialized views directly in the existing Gold schema. Configure schema-level Lakehouse Sync from the app-owned Postgres schema into the selected UC CDC schema. Verify the two paths use distinct source and destination objects.
 
-- [ ] **Step 6: Verify round-trip behavior**
+- [x] **Step 6: Verify round-trip behavior**
 
 Write an intervention through the tested transaction helper, confirm it in Lakebase, wait for its append-only CDC record in Unity Catalog, and prove a serving-table refresh does not alter the app-owned intervention row.
 
-- [ ] **Step 7: Capture evidence, walk through, and commit**
+- [x] **Step 7: Capture evidence, walk through, and commit**
 
 Save sanitized transaction output, sync status, CDC rows, and overwrite-protection result to `evidence/07-lakebase/`. Commit with `feat: add safe advisor intervention writeback`.
 

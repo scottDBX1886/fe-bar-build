@@ -155,3 +155,39 @@ def test_intervention_events_are_immutable():
     )
     assert result.returncode != 0
     assert "immutable" in result.stderr.lower()
+
+
+def test_synced_gold_serving_tables_expose_select_only_reader_privileges():
+    reader_role = _psql(
+        "SELECT rolname FROM pg_roles "
+        "WHERE rolname LIKE 'databricks_reader_%' ORDER BY rolname LIMIT 1;"
+    ).stdout.strip()
+    assert reader_role
+
+    counts = _psql(
+        """
+        SELECT
+          (SELECT count(*) FROM student_retention_gold.serving_executive_retention_metrics)
+          || '|' ||
+          (SELECT count(*) FROM student_retention_gold.serving_risk_trends);
+        """
+    ).stdout.strip()
+    assert all(int(count) > 0 for count in counts.split("|"))
+
+    privileges = _psql(
+        f"""
+        SELECT
+          has_table_privilege('{reader_role}',
+            'student_retention_gold.serving_executive_retention_metrics', 'SELECT')
+          || '|' ||
+          has_table_privilege('{reader_role}',
+            'student_retention_gold.serving_executive_retention_metrics', 'INSERT')
+          || '|' ||
+          has_table_privilege('{reader_role}',
+            'student_retention_gold.serving_executive_retention_metrics', 'UPDATE')
+          || '|' ||
+          has_table_privilege('{reader_role}',
+            'student_retention_gold.serving_executive_retention_metrics', 'DELETE');
+        """
+    ).stdout.strip()
+    assert privileges == "true|false|false|false"

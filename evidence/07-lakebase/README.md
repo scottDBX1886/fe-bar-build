@@ -9,7 +9,13 @@ idempotency replay, transactional rollback, and immutable event history. The
 sanitized round-trip intervention arrived in both Unity Catalog CDC history
 tables.
 
-The reverse serving path remains blocked: registering `student_retention_lakebase`
-requires metastore `CREATE CATALOG`, which the selected profile does not hold.
-Consequently UC-to-Lakebase synchronized serving tables and the final
-serving-refresh overwrite-protection proof are not claimed here.
+The reverse serving path is also verified. Two snapshot-mode synchronized
+tables were created directly in the existing Unity Catalog Gold schema and are
+available in the `student_retention_gold` Postgres schema. No separate catalog
+was required. Both sources are materialized views, so snapshot scheduling is
+used because materialized views do not support Change Data Feed.
+
+The Lakebase reader role has SELECT and lacks INSERT, UPDATE, and DELETE on the
+serving tables. After both serving snapshots completed, the app-owned sanitized
+round-trip intervention remained `open` at version 1. The serving and writeback
+schemas are distinct, so a serving refresh cannot target intervention state.

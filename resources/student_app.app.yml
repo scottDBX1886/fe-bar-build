@@ -8,6 +8,7 @@ resources:
         started: true
       user_api_scopes:
         - dashboards.genie
+        - sql
       resources:
         - name: sql-warehouse
           sql_warehouse:

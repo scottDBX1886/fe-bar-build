@@ -1,0 +1,30 @@
+Task 12 verification — 2026-09-23
+
+App workflow tests:
+  Test Files  2 passed (2)
+  Tests       9 passed (9)
+
+Lakebase sync/transaction contract tests:
+  5 passed, 5 skipped
+  Skips require RUN_LAKEBASE_INTEGRATION=1 and are covered by the prior Task 8 deployed evidence.
+
+Static and build checks:
+  npm run typecheck: PASS
+  npm run lint: PASS
+  npm run lint:ast-grep: PASS
+  npm run build: PASS
+  databricks apps validate --profile fe-bar: PASS
+  databricks bundle validate --strict -t dev --profile fe-bar: PASS
+
+Deployed verification:
+  deployment_id: 01f1b78320b9177582f21afca22caa2f
+  deployment_state: SUCCEEDED
+  app_state: RUNNING
+  compute_state: ACTIVE
+  effective_user_api_scopes: dashboards.genie, sql
+  advisor_caseload_runtime: PASS after signed-in user approved the new sql scope
+
+Safety checks:
+  Advisor/student reads use .obo.sql and retain Unity Catalog row/column policy enforcement.
+  Intervention mutations call student_retention_app transaction functions only.
+  No mutation targets student_retention_gold synchronized serving tables.

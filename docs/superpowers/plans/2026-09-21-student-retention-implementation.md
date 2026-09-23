@@ -520,29 +520,29 @@ Explain the three data-access paths and why each exists. Commit with `feat: scaf
 - Consumes: Gold aggregate queries, Lakebase serving tables, intervention APIs, and identity.
 - Produces: Role-aware executive/advisor experiences and a complete intervention workflow.
 
-- [ ] **Step 1: Write UI behavior tests before pages**
+- [x] **Step 1: Write UI behavior tests before pages**
 
 Test loading, empty, error, partial/stale, executive aggregate-only view, advisor assignment filtering, server pagination, student detail, successful intervention, version conflict, duplicate submission, and GenAI-summary failure fallback.
 
 Test the Lakebase repository against the transaction result contract proven in Task 8 before adding HTTP endpoints.
 
-- [ ] **Step 2: Build Executive Overview**
+- [x] **Step 2: Build Executive Overview**
 
 Compose KPI cards from published AppKit primitives. Each KPI includes unit, period, prior comparison, freshness, and source. Use line/bar charts with semantic tokens and honest scales for retention, risk, coverage, responsiveness, and estimated tuition exposure.
 
-- [ ] **Step 3: Build Advisor Caseload and Student Detail**
+- [x] **Step 3: Build Advisor Caseload and Student Detail**
 
 Use server-side pagination/filtering and default sort by actionable risk plus follow-up urgency. Show risk history, contributing factors, cited GenAI briefing, governed facts, and intervention timeline without protected audit attributes.
 
-- [ ] **Step 4: Build Intervention Workflow**
+- [x] **Step 4: Build Intervention Workflow**
 
 Implement `app/server/interventions.ts` so create/update/close endpoints execute the Task 8 transaction contract. Generate idempotency keys client-side per submitted action, send expected version, show 409 conflicts with a reload action, and never issue mutations to serving-table routes.
 
-- [ ] **Step 5: Verify access and states**
+- [x] **Step 5: Verify access and states**
 
 Run Vitest and Playwright locally, then deployed smoke tests as representative executive and advisor identities where workspace test identities are available. Verify policy enforcement with direct query attempts in addition to UI assertions.
 
-- [ ] **Step 6: Capture evidence, walk through, and commit**
+- [x] **Step 6: Capture evidence, walk through, and commit**
 
 Save test output and sanitized API/query results to `evidence/10-app-workflows/`. Commit with `feat: build executive and advisor workflows`.
 

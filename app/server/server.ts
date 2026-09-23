@@ -1,4 +1,5 @@
 import { createApp, analytics, genie, lakebase, server } from '@databricks/appkit';
+import { registerWorkflowRoutes } from './interventions';
 
 const genieSpaceId = process.env.DATABRICKS_GENIE_SPACE_ID;
 
@@ -17,6 +18,7 @@ createApp({
     }
 
     appkit.server.extend((app) => {
+      registerWorkflowRoutes(app, appkit.lakebase);
       app.get('/api/whoami', (req, res) => {
         res.json({
           email: req.header('x-forwarded-email') ?? null,

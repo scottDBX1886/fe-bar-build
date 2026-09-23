@@ -4,5 +4,36 @@ import "@databricks/appkit-ui/react";
 import type { SQLTypeMarker, SQLStringMarker, SQLNumberMarker, SQLBooleanMarker, SQLBinaryMarker, SQLDateMarker, SQLTimestampMarker } from "@databricks/appkit-ui/js";
 
 declare module "@databricks/appkit-ui/react" {
-  interface QueryRegistry {}
+  interface QueryRegistry {
+    advisor_caseload: {
+        name: "advisor_caseload";
+        parameters: {
+          /** STRING - use sql.string() */
+          riskTier: SQLStringMarker;
+          /** INT - use sql.int() */
+          pageSize: SQLNumberMarker;
+          /** INT - use sql.int() */
+          pageOffset: SQLNumberMarker;
+        };
+        result: unknown;
+      };
+    executive_kpis: {
+        name: "executive_kpis";
+        parameters: Record<string, never>;
+        result: unknown;
+      };
+    executive_trends: {
+        name: "executive_trends";
+        parameters: Record<string, never>;
+        result: unknown;
+      };
+    student_detail: {
+        name: "student_detail";
+        parameters: {
+          /** STRING - use sql.string() */
+          studentId: SQLStringMarker;
+        };
+        result: unknown;
+      };
+  }
 }

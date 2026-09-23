@@ -6,7 +6,8 @@ export default defineConfig({
     passWithNoTests: true,
     globals: true,
     environment: 'node',
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.databricks/**', 'tests/**'],
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.databricks/**'],
   },
   resolve: {
     alias: {

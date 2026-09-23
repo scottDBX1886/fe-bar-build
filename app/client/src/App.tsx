@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { fetchWhoAmI, type WhoAmI } from './lib/whoami';
 import { ExecutiveOverviewPage } from './pages/executive/ExecutiveOverviewPage';
 import { AdvisorCaseloadPage } from './pages/advisor/AdvisorCaseloadPage';
+import { StudentDetailPage } from './pages/advisor/StudentDetailPage';
 import { GeniePage } from './pages/genie/GeniePage';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -96,6 +97,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <ExecutiveOverviewPage /> },
       { path: '/caseload', element: <AdvisorCaseloadPage /> },
+      { path: '/students/:studentId', element: <StudentDetailPage /> },
       { path: '/genie', element: <GeniePage /> },
     ],
   },

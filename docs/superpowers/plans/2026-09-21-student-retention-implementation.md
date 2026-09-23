@@ -589,23 +589,23 @@ Save sanitized embedded-chat transcripts, generated SQL, and test output to `evi
 - Consumes: All generation, pipeline, ML, GenAI, sync, and evidence tasks.
 - Produces: One observable triggered workflow representing a new synthetic day.
 
-- [ ] **Step 1: Write workflow contract tests**
+- [x] **Step 1: Write workflow contract tests**
 
 Assert task dependencies: generate → Lakeflow update → train-if-requested → score → GenAI summaries → serving-sync check → CDC/Gold refresh → evidence capture. A routine daily run skips retraining unless the explicit retrain parameter is true.
 
-- [ ] **Step 2: Configure task parameters and failure boundaries**
+- [x] **Step 2: Configure task parameters and failure boundaries**
 
 Pass run date, seed, catalog, schemas, and model alias explicitly. Make generation, ingestion, scoring, and Gold publication hard gates. Treat GenAI briefing generation as degradable while retaining visible failure status. Do not let Genie availability block pipeline completion.
 
-- [ ] **Step 3: Implement operational monitoring and recovery**
+- [x] **Step 3: Implement operational monitoring and recovery**
 
 Document update-ID polling, job result-state checks, UC-to-Lakebase sync status, Lakehouse Sync lag, safe rerun behavior, and the Lakehouse Sync Beta fallback export. Never prescribe a full refresh without explicit approval.
 
-- [ ] **Step 4: Run two consecutive synthetic days**
+- [x] **Step 4: Run two consecutive synthetic days**
 
 Run day one, then the incident day. Verify incremental counts, one student's risk transition, an intervention write, CDC arrival, and updated aggregate coverage. Re-run the incident day to prove idempotency.
 
-- [ ] **Step 5: Capture evidence, walk through, and commit**
+- [x] **Step 5: Capture evidence, walk through, and commit**
 
 Save structured task outputs and before/after SQL to `evidence/12-daily-workflow/`. Commit with `feat: orchestrate triggered retention workflow`.
 

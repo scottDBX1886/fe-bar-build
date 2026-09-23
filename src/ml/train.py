@@ -86,6 +86,8 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument("--experiment-path", required=True)
     parser.add_argument("--bundle-root", required=True)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--model-alias", default="prod")
+    parser.add_argument("--no-score", action="store_true")
     return parser.parse_args()
 
 
@@ -220,9 +222,10 @@ def main(args: argparse.Namespace) -> dict[str, Any]:
 
     registered = mlflow.register_model(model_info.model_uri, model_name)
     client = MlflowClient(registry_uri="databricks-uc")
-    client.set_registered_model_alias(model_name, "prod", registered.version)
-    rows_scored = score_registered_model(
-        catalog=args.catalog, schema_prefix=args.schema_prefix, model_version=str(registered.version)
+    client.set_registered_model_alias(model_name, args.model_alias, registered.version)
+    rows_scored = 0 if args.no_score else score_registered_model(
+        catalog=args.catalog, schema_prefix=args.schema_prefix,
+        model_version=str(registered.version), model_alias=args.model_alias,
     )
     output = {
         "run_id": run_id,

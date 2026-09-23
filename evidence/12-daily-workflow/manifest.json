@@ -1,0 +1,14 @@
+{
+  "task": 14,
+  "name": "triggered-daily-workflow",
+  "profile": "fe-bar",
+  "catalog": "serverless_stable_febar_scottj_catalog",
+  "job_id": 666694306037627,
+  "artifacts": [
+    "README.md",
+    "queries.sql",
+    "query-results.json",
+    "run-output.json",
+    "verification.txt"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "before_idempotency_rerun": {
+    "risk_history": [
+      {"score_date": "2026-09-21", "rows": 20000, "students": 20000},
+      {"score_date": "2026-09-22", "rows": 20000, "students": 20000},
+      {"score_date": "2026-09-23", "rows": 20000, "students": 20000}
+    ],
+    "student_transition": [
+      {"student_id": "STU-002564", "score_date": "2026-09-21", "risk_score": 0.455889, "risk_tier": "medium"},
+      {"student_id": "STU-002564", "score_date": "2026-09-22", "risk_score": 0.637168, "risk_tier": "high"},
+      {"student_id": "STU-002564", "score_date": "2026-09-23", "risk_score": 0.637202, "risk_tier": "high"}
+    ],
+    "intervention_cdc": {"rows": 38, "latest_cdc_at": "2026-09-23T14:12:34.262998"},
+    "intervention_event_cdc": {"rows": 32, "latest_cdc_at": "2026-09-23T14:12:34.263025"},
+    "executive_coverage": {
+      "rows": 16,
+      "latest_score_date": "2026-09-23",
+      "latest_freshness_at": "2026-09-23T21:14:17.153603"
+    }
+  },
+  "after_idempotency_rerun": {
+    "risk_history_rows": 60000,
+    "advisor_summary_rows": 55,
+    "executive_metric_rows": 16,
+    "intervention_cdc_rows": 38,
+    "intervention_event_cdc_rows": 32,
+    "executive_freshness": "2026-09-23T21:14:17.153603",
+    "all_logical_counts_unchanged": true
+  }
+}

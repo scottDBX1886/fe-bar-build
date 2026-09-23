@@ -1,0 +1,52 @@
+{
+  "job_id": 666694306037627,
+  "runs": [
+    {
+      "purpose": "day_one",
+      "run_date": "2026-09-22",
+      "run_id": 718159461653978,
+      "result": "SUCCESS"
+    },
+    {
+      "purpose": "snapshot_date_repair",
+      "run_date": "2026-09-22",
+      "run_id": 1026689789179684,
+      "result": "SUCCESS"
+    },
+    {
+      "purpose": "incident_day",
+      "run_date": "2026-09-23",
+      "run_id": 1039509727786572,
+      "evidence_task_run_id": 993004035969117,
+      "result": "SUCCESS",
+      "selected_scoring_path": "score_existing_model",
+      "training_path": "EXCLUDED",
+      "counts": {
+        "risk_history_rows": 60000,
+        "executive_metric_rows": 16,
+        "advisor_summary_rows": 55,
+        "intervention_cdc_rows": 38,
+        "intervention_event_cdc_rows": 32
+      },
+      "executive_freshness": "2026-09-23T21:14:17.153603"
+    },
+    {
+      "purpose": "incident_day_idempotency_rerun",
+      "run_date": "2026-09-23",
+      "run_id": 961267010710573,
+      "evidence_task_run_id": 47030527785552,
+      "result": "SUCCESS",
+      "selected_scoring_path": "score_existing_model",
+      "training_path": "EXCLUDED",
+      "counts": {
+        "risk_history_rows": 60000,
+        "executive_metric_rows": 16,
+        "advisor_summary_rows": 55,
+        "intervention_cdc_rows": 38,
+        "intervention_event_cdc_rows": 32
+      },
+      "executive_freshness": "2026-09-23T21:14:17.153603",
+      "matches_incident_day": true
+    }
+  ]
+}

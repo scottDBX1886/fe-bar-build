@@ -328,11 +328,16 @@ def _point_in_time_features(snapshots: DataFrame) -> DataFrame:
 )
 def student_daily_snapshots() -> DataFrame:
     students = spark.read.table(_silver("students"))
-    snapshots = students.select(
+    event_dates = (
+        spark.read.table(_silver("attendance_events")).select("run_date")
+        .unionByName(spark.read.table(_silver("engagement_events")).select("run_date"))
+        .unionByName(spark.read.table(_silver("financial_events")).select("run_date"))
+        .where(F.col("run_date").isNotNull())
+        .distinct()
+    )
+    snapshots = students.select("student_id").crossJoin(event_dates).select(
         "student_id",
-        F.to_timestamp(F.concat(F.col("run_date").cast("string"), F.lit(" 23:59:59"))).alias(
-            "feature_as_of"
-        ),
+        F.to_timestamp(F.concat(F.col("run_date").cast("string"), F.lit(" 23:59:59"))).alias("feature_as_of"),
     )
     return _point_in_time_features(snapshots)
 

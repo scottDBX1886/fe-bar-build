@@ -4,7 +4,8 @@ from pathlib import Path
 def test_scoring_implementation_preserves_immutable_history_contract():
     source = Path("src/ml/score.py").read_text(encoding="utf-8")
     assert "models:/" in source
-    assert "@prod" in source
+    assert 'model_alias: str = "prod"' in source
+    assert 'model_uri = f"models:/{model_name}@{model_alias}"' in source
     assert "mlflow.pyfunc.spark_udf" in source
     assert "MERGE INTO" in source
     assert "student_id" in source

@@ -7,7 +7,8 @@ from typing import Any
 
 
 def score_registered_model(
-    *, catalog: str, schema_prefix: str, model_version: str | None = None
+    *, catalog: str, schema_prefix: str, model_version: str | None = None,
+    model_alias: str = "prod",
 ) -> int:
     import mlflow
     from mlflow import MlflowClient
@@ -21,10 +22,10 @@ def score_registered_model(
         spark = SparkSession.builder.getOrCreate()
 
     model_name = f"{catalog}.{schema_prefix}_ml.student_stopout_risk"
-    model_uri = f"models:/{model_name}@prod"
+    model_uri = f"models:/{model_name}@{model_alias}"
     resolved_version = model_version or str(
         MlflowClient(registry_uri="databricks-uc")
-        .get_model_version_by_alias(model_name, "prod")
+        .get_model_version_by_alias(model_name, model_alias)
         .version
     )
     result_type = StructType(
@@ -85,6 +86,7 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema-prefix", required=True)
     parser.add_argument("--model-version")
+    parser.add_argument("--model-alias", default="prod")
     return parser.parse_args()
 
 

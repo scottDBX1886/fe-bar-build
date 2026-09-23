@@ -2,14 +2,21 @@ resources:
   jobs:
     student_retention_daily:
       name: ${bundle.target}-student-retention-daily
+      max_concurrent_runs: 1
       parameters:
         - name: run_date
           default: "2026-09-21"
         - name: bootstrap
-          default: "true"
+          default: "false"
+        - name: retrain
+          default: "false"
+        - name: model_alias
+          default: prod
       tasks:
         - task_key: generate_synthetic_data
           environment_key: default
+          timeout_seconds: 1800
+          max_retries: 1
           spark_python_task:
             python_file: ../src/synthetic/generate.py
             parameters:
@@ -23,16 +30,29 @@ resources:
               - ${var.retention_seed}
               - --bootstrap
               - "{{job.parameters.bootstrap}}"
+
         - task_key: run_student_pipeline
           depends_on:
             - task_key: generate_synthetic_data
+          timeout_seconds: 3600
           pipeline_task:
             pipeline_id: ${resources.pipelines.student_retention_pipeline.id}
             full_refresh: false
-        - task_key: train_and_score_stopout_risk
+
+        - task_key: retrain_requested
           depends_on:
             - task_key: run_student_pipeline
+          condition_task:
+            left: "{{job.parameters.retrain}}"
+            op: EQUAL_TO
+            right: "true"
+
+        - task_key: train_model
+          depends_on:
+            - task_key: retrain_requested
+              outcome: "true"
           environment_key: ml
+          timeout_seconds: 3600
           spark_python_task:
             python_file: ../src/ml/train.py
             parameters:
@@ -46,9 +66,38 @@ resources:
               - ${workspace.root_path}/files
               - --seed
               - ${var.retention_seed}
+              - --model-alias
+              - "{{job.parameters.model_alias}}"
+              - --no-score
+
+        - task_key: score_after_train
+          depends_on:
+            - task_key: train_model
+          environment_key: ml
+          timeout_seconds: 1800
+          spark_python_task: &score_task
+            python_file: ../src/ml/score.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --model-alias
+              - "{{job.parameters.model_alias}}"
+
+        - task_key: score_existing_model
+          depends_on:
+            - task_key: retrain_requested
+              outcome: "false"
+          environment_key: ml
+          timeout_seconds: 1800
+          spark_python_task: *score_task
+
         - task_key: bootstrap_gold_governance
           depends_on:
-            - task_key: train_and_score_stopout_risk
+            - task_key: score_after_train
+            - task_key: score_existing_model
+          run_if: AT_LEAST_ONE_SUCCESS
           environment_key: default
           spark_python_task:
             python_file: ../src/governance/apply.py
@@ -61,12 +110,15 @@ resources:
               - ${workspace.root_path}/files
               - --mode
               - bootstrap
+
         - task_key: run_gold_pipeline
           depends_on:
             - task_key: bootstrap_gold_governance
+          timeout_seconds: 3600
           pipeline_task:
             pipeline_id: ${resources.pipelines.student_retention_gold_pipeline.id}
             full_refresh: false
+
         - task_key: apply_gold_core_policies
           depends_on:
             - task_key: run_gold_pipeline
@@ -82,10 +134,12 @@ resources:
               - ${workspace.root_path}/files
               - --mode
               - core-policies
+
         - task_key: generate_advisor_briefings
           depends_on:
             - task_key: apply_gold_core_policies
           environment_key: ml
+          timeout_seconds: 1800
           spark_python_task:
             python_file: ../src/genai/generate.py
             parameters:
@@ -97,10 +151,12 @@ resources:
               - "5"
               - --endpoint
               - ${var.foundation_model_endpoint}
+
         - task_key: evaluate_advisor_briefings
           depends_on:
             - task_key: generate_advisor_briefings
           environment_key: ml
+          timeout_seconds: 1800
           spark_python_task:
             python_file: ../src/genai/evaluate.py
             parameters:
@@ -116,6 +172,47 @@ resources:
               - "{{tasks.generate_advisor_briefings.values.generation_run_id}}"
               - --bundle-root
               - ${workspace.root_path}/files
+
+        - task_key: check_serving_sync
+          depends_on:
+            - task_key: generate_advisor_briefings
+            - task_key: evaluate_advisor_briefings
+          run_if: ALL_DONE
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/operations/daily.py
+            parameters:
+              - --mode
+              - serving-sync-check
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+
+        - task_key: refresh_intervention_gold
+          depends_on:
+            - task_key: check_serving_sync
+          timeout_seconds: 3600
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.student_retention_gold_pipeline.id}
+            full_refresh: false
+
+        - task_key: capture_daily_evidence
+          depends_on:
+            - task_key: refresh_intervention_gold
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/operations/daily.py
+            parameters:
+              - --mode
+              - capture-evidence
+              - --catalog
+              - ${var.catalog}
+              - --schema-prefix
+              - ${var.schema_prefix}
+              - --run-date
+              - "{{job.parameters.run_date}}"
+
       environments:
         - environment_key: default
           spec:

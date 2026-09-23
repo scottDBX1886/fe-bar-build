@@ -412,19 +412,19 @@ Save sanitized transaction output, sync status, CDC rows, and overwrite-protecti
 - Consumes: Lakebase `lb_interventions_history` and `lb_intervention_events_history` CDC tables.
 - Produces: Current intervention state, immutable analytical event history, and refreshed executive/advisor metrics.
 
-- [ ] **Step 1: Write failing CDC reconstruction tests**
+- [x] **Step 1: Write failing CDC reconstruction tests**
 
 Cover insert, update preimage/postimage, delete, duplicate delivery, out-of-order input ordered by Postgres LSN, and current-state selection by primary key. Verify deletes disappear from current state but remain in audit history.
 
-- [ ] **Step 2: Implement deterministic CDC transformations**
+- [x] **Step 2: Implement deterministic CDC transformations**
 
 Use `_pg_lsn` and `_sort_by` for ordering. Publish current-state and event-history views, then join them into intervention coverage, responsiveness, caseload urgency, and follow-up metrics.
 
-- [ ] **Step 3: Refresh and verify Gold**
+- [x] **Step 3: Refresh and verify Gold**
 
 Run a selective pipeline refresh after a Lakebase write. Verify the advisor caseload and executive aggregate change exactly once and the student risk score remains unchanged by the intervention write.
 
-- [ ] **Step 4: Capture evidence, walk through, and commit**
+- [x] **Step 4: Capture evidence, walk through, and commit**
 
 Save before/after queries and CDC reconstruction checks to `evidence/08-intervention-gold/`. Commit with `feat: integrate intervention history into gold`.
 

@@ -1,0 +1,41 @@
+{
+  "verification_intervention": {
+    "student_id": "STU-008502",
+    "advisor_id": "ADV-022",
+    "result": "applied",
+    "version": 1
+  },
+  "before": {
+    "current_interventions": 21,
+    "event_count": 31,
+    "students": 20000,
+    "at_risk": 2664,
+    "covered": 0.0,
+    "risk_score": 0.9999929444166079,
+    "intervention_status": "not_started"
+  },
+  "after": {
+    "current_interventions": 22,
+    "event_count": 32,
+    "students": 20000,
+    "at_risk": 2664,
+    "covered": 1.0,
+    "risk_score": 0.9999929444166079,
+    "intervention_status": "open"
+  },
+  "deltas": {
+    "current_interventions": 1,
+    "event_count": 1,
+    "covered": 1.0,
+    "risk_score": 0.0
+  },
+  "audit_change_counts": {
+    "insert": 22,
+    "update_preimage": 8,
+    "update_postimage": 8
+  },
+  "event_uniqueness": {
+    "rows": 32,
+    "distinct_event_ids": 32
+  }
+}

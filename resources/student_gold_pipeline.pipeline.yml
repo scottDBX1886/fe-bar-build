@@ -7,6 +7,8 @@ resources:
       root_path: ../src/pipelines
       libraries:
         - file:
+            path: ../src/pipelines/intervention_cdc.py
+        - file:
             path: ../src/pipelines/gold.py
       serverless: true
       continuous: false

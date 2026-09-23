@@ -1,0 +1,26 @@
+TDD red:
+- Four CDC reconstruction tests failed with NotImplementedError.
+- The Gold coverage test returned 0.0 instead of 2/3 for real Lakebase statuses.
+
+TDD green:
+- pytest -q tests/unit/test_intervention_cdc.py tests/unit/test_gold_metrics.py
+- Result: 12 passed.
+
+Final verification:
+- pytest -q: 117 passed, 5 skipped in 4.07s.
+- python3 -m compileall -q src scripts tests: exit 0.
+- Evidence JSON validation and git diff check: exit 0.
+- databricks bundle validate --strict -t dev --profile fe-bar: Validation OK.
+
+Remote pipeline:
+- Graph validation update 5f318f92-e8fa-45dd-a24a-af9aa45ae6ee: COMPLETED.
+- Initial materialization update e25e0fb1-5ab1-4773-ae01-c28b9202cc5f: COMPLETED.
+- Post-write selective update c0fba4d0-4acd-45e9-aff8-97e4676e1f20: COMPLETED.
+
+End-to-end assertions:
+- Current intervention rows changed 21 to 22.
+- Immutable event rows changed 31 to 32, with 32 distinct event IDs.
+- Covered at-risk students changed 0 to 1.
+- Total students remained 20,000 and at-risk students remained 2,664.
+- STU-008502 risk score remained exactly 0.9999929444166079.
+- STU-008502 intervention status changed from not_started to open.

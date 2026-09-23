@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "task": "08-intervention-gold",
+  "captured_at": "2026-09-23T14:15:00Z",
+  "profile": "fe-bar",
+  "pipeline_id": "90801e09-c6fd-4156-9515-7cbd514f081d",
+  "successful_update_id": "c0fba4d0-4acd-45e9-aff8-97e4676e1f20",
+  "outputs": [
+    "serverless_stable_febar_scottj_catalog.student_retention_gold.intervention_state_history",
+    "serverless_stable_febar_scottj_catalog.student_retention_gold.intervention_current_state",
+    "serverless_stable_febar_scottj_catalog.student_retention_gold.intervention_event_history"
+  ],
+  "artifacts": [
+    "README.md",
+    "manifest.json",
+    "queries.sql",
+    "query-results.json",
+    "verification.txt"
+  ]
+}

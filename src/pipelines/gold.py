@@ -6,11 +6,19 @@ from pyspark import pipelines as dp
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
 
+from intervention_cdc import (
+    current_interventions_dataframe,
+    intervention_audit_dataframe,
+    intervention_event_history_dataframe,
+    student_intervention_summary_dataframe,
+)
+
 
 CATALOG = spark.conf.get("retention.catalog")
 SCHEMA_PREFIX = spark.conf.get("retention.schema_prefix")
 SILVER_SCHEMA = f"{SCHEMA_PREFIX}_silver"
 GOLD_SCHEMA = f"{SCHEMA_PREFIX}_gold"
+CDC_SCHEMA = f"{SCHEMA_PREFIX}_cdc"
 ADVISOR_ROW_FILTER = f"ROW FILTER {CATALOG}.{GOLD_SCHEMA}.advisor_row_filter ON (advisor_id)"
 
 
@@ -20,6 +28,98 @@ def _silver(table: str) -> str:
 
 def _gold(table: str) -> str:
     return f"{CATALOG}.{GOLD_SCHEMA}.{table}"
+
+
+def _cdc(table: str) -> str:
+    return f"{CATALOG}.{CDC_SCHEMA}.{table}"
+
+
+def _intervention_audit() -> DataFrame:
+    return intervention_audit_dataframe(
+        spark.read.table(_cdc("lb_interventions_history"))
+    )
+
+
+def _current_interventions() -> DataFrame:
+    return current_interventions_dataframe(
+        spark.read.table(_cdc("lb_interventions_history"))
+    )
+
+
+def _intervention_events() -> DataFrame:
+    return intervention_event_history_dataframe(
+        spark.read.table(_cdc("lb_intervention_events_history"))
+    )
+
+
+@dp.materialized_view(
+    name=_gold("intervention_state_history"),
+    comment="Ordered Lakebase intervention CDC audit with duplicate delivery removed.",
+    cluster_by=["advisor_id", "student_id", "_pg_lsn"],
+    table_properties={"quality": "gold", "data_product": "intervention_audit"},
+    row_filter=ADVISOR_ROW_FILTER,
+)
+def intervention_state_history() -> DataFrame:
+    return _intervention_audit().select(
+        "_pg_change_type", "_pg_lsn", "_pg_xid",
+        F.col("_timestamp").cast("timestamp").alias("_timestamp"), "_sort_by",
+        "intervention_id", "student_id", "advisor_id", "intervention_type",
+        "priority", "status", "next_follow_up_at", "outcome", "version",
+        "created_at", "updated_at", "closed_at",
+    )
+
+
+@dp.materialized_view(
+    name=_gold("intervention_current_state"),
+    comment="Current non-deleted intervention state reconstructed from ordered CDC.",
+    cluster_by=["advisor_id", "student_id", "status"],
+    table_properties={"quality": "gold", "data_product": "intervention_current"},
+    row_filter=ADVISOR_ROW_FILTER,
+)
+def intervention_current_state() -> DataFrame:
+    return _current_interventions().select(
+        "intervention_id", "student_id", "advisor_id", "intervention_type",
+        "priority", "status", "next_follow_up_at", "outcome", "version",
+        "created_at", "updated_at", "closed_at", "_pg_lsn", "_sort_by",
+    )
+
+
+@dp.materialized_view(
+    name=_gold("intervention_event_history"),
+    comment="Immutable analytical intervention events reconstructed from Lakebase CDC.",
+    cluster_by=["advisor_id", "student_id", "event_at"],
+    table_properties={"quality": "gold", "data_product": "intervention_events"},
+    row_filter=ADVISOR_ROW_FILTER,
+)
+def intervention_event_history() -> DataFrame:
+    identities = (
+        _intervention_audit()
+        .withColumn(
+            "_identity_rank",
+            F.row_number().over(
+                Window.partitionBy("intervention_id").orderBy(
+                    F.col("_pg_lsn").desc(), F.col("_sort_by").desc()
+                )
+            ),
+        )
+        .filter(F.col("_identity_rank") == 1)
+        .select("intervention_id", "student_id", "advisor_id")
+    )
+    return _intervention_events().join(
+        identities, "intervention_id", "inner"
+    ).select(
+        "event_id", "intervention_id", "student_id", "advisor_id", "event_type",
+        "event_at", "note", "prior_status", "new_status", "result_version",
+        "_pg_lsn", "_sort_by",
+        F.col("_timestamp").cast("timestamp").alias("_timestamp"),
+    )
+
+
+def _student_interventions() -> DataFrame:
+    return student_intervention_summary_dataframe(
+        spark.read.table(_gold("intervention_current_state")),
+        spark.read.table(_gold("intervention_event_history")),
+    )
 
 
 def _latest_scores() -> DataFrame:
@@ -58,7 +158,7 @@ def _student_context() -> DataFrame:
         .select("student_id", "label_term_code", "outcome_status")
         .alias("o")
     )
-    return (
+    base = (
         scores.join(
             features,
             (F.col("r.student_id") == F.col("f.student_id"))
@@ -82,10 +182,6 @@ def _student_context() -> DataFrame:
             F.col("r.risk_tier").alias("risk_tier"),
             F.col("r.leading_factors").alias("leading_factors"),
             F.col("o.outcome_status").alias("outcome_status"),
-            F.lit("not_started").alias("intervention_status"),
-            F.lit(None).cast("timestamp").alias("first_intervention_at"),
-            F.lit(False).alias("follow_up_due"),
-            F.lit(False).alias("follow_up_completed"),
             F.col("f.attendance_rate_28d").alias("attendance_rate_28d"),
             F.col("f.missed_assignments_28d").alias("missed_assignments_28d"),
             F.col("f.days_since_lms_activity").alias("days_since_lms_activity"),
@@ -93,6 +189,26 @@ def _student_context() -> DataFrame:
             F.col("f.cumulative_gpa").alias("cumulative_gpa"),
             F.col("f.synthetic_net_tuition_next_term").alias(
                 "synthetic_net_tuition_next_term"
+            ),
+        )
+    )
+    return (
+        base.alias("b")
+        .join(
+            _student_interventions().alias("i"),
+            F.col("b.student_id") == F.col("i.student_id"),
+            "left",
+        )
+        .select(
+            "b.*",
+            F.coalesce(F.col("i.intervention_status"), F.lit("not_started")).alias(
+                "intervention_status"
+            ),
+            F.col("i.intervention_priority").alias("intervention_priority"),
+            F.col("i.first_intervention_at").alias("first_intervention_at"),
+            F.coalesce(F.col("i.follow_up_due"), F.lit(False)).alias("follow_up_due"),
+            F.coalesce(F.col("i.follow_up_completed"), F.lit(False)).alias(
+                "follow_up_completed"
             ),
         )
     )
@@ -116,7 +232,8 @@ def advisor_caseload() -> DataFrame:
         .select(
             "student_id", "advisor_id", "program_code", "cohort_code", "term_code",
             "score_date", "risk_score", "risk_tier", "leading_factors",
-            "intervention_status", "caseload_priority", "scored_at",
+            "intervention_status", "intervention_priority", "first_intervention_at",
+            "follow_up_due", "follow_up_completed", "caseload_priority", "scored_at",
         )
     )
 
@@ -213,5 +330,6 @@ def genie_retention() -> DataFrame:
     return _student_context().select(
         "student_id", "advisor_id", "program_code", "cohort_code", "term_code",
         "score_date", "risk_score", "risk_tier", "leading_factors",
-        "intervention_status", "outcome_status",
+        "intervention_status", "intervention_priority", "follow_up_due",
+        "follow_up_completed", "outcome_status",
     )

@@ -6,7 +6,9 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 ELEVATED_RISK_TIERS = frozenset({"medium", "high"})
-ACTIVE_INTERVENTION_STATUSES = frozenset({"open", "in_progress", "completed"})
+ACTIVE_INTERVENTION_STATUSES = frozenset(
+    {"open", "in_progress", "pending_follow_up", "closed"}
+)
 
 
 def retention_rate(outcomes: Sequence[str]) -> float:

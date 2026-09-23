@@ -33,11 +33,12 @@ def test_top_k_caseload_orders_by_score_then_student_id():
 
 def test_intervention_coverage_is_at_risk_students_with_an_intervention():
     rows = [
-        {"risk_tier": "high", "intervention_status": "open"},
+        {"risk_tier": "high", "intervention_status": "pending_follow_up"},
+        {"risk_tier": "medium", "intervention_status": "closed"},
         {"risk_tier": "medium", "intervention_status": "not_started"},
         {"risk_tier": "low", "intervention_status": "open"},
     ]
-    assert intervention_coverage(rows) == 0.5
+    assert intervention_coverage(rows) == pytest.approx(2 / 3)
 
 
 def test_time_to_first_intervention_uses_nonnegative_elapsed_days():

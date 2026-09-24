@@ -40,8 +40,8 @@ Existing domain-specific evidence
 - Idempotent deployed workflow: evidence/12-daily-workflow/
 
 Presentation
-- Official Databricks-template PowerPoint: docs/presentation/student-retention.pptx
-- Portable rendered deck: docs/presentation/student-retention.pdf
+- Official Databricks corporate-template PowerPoint: docs/presentation/student-retention.pptx
+- Portable 12-page corporate-template PDF: docs/presentation/student-retention.pdf
 - Outcome-led narrative source: docs/presentation/student-retention.md
-- Structural validation: 12 slides; no known template placeholders; synthetic-data disclosure present
-- Visual QA: all 12 rendered pages inspected; architecture formatting corrected; no observed clipping or overflow
+- Google Slides validation: PASS; 12 slides; 0 errors
+- Visual QA: all 12 rendered pages inspected; cover overflow corrected; no observed clipping or overlap

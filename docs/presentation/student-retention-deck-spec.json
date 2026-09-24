@@ -1,8 +1,8 @@
 [
   {
     "layout": "title",
-    "title": "From Fragmented Signals to Timely Student Support",
-    "body": "A governed student-retention workflow on Databricks\nPublic Sector • Higher Education • Synthetic demonstration"
+    "title": "Timely Student Support",
+    "subtitle": "From fragmented signals to governed action on Databricks • Synthetic demonstration"
   },
   {
     "layout": "power_statement",
@@ -46,9 +46,16 @@
     ]
   },
   {
-    "layout": "content_basic",
+    "layout": "content_3col",
     "title": "Governed Databricks architecture",
-    "body": "Synthetic SIS / LMS / attendance / finance\n↓\nLakeflow Bronze → Silver → MLflow scoring → Unity Catalog Gold\n↓                                      ↓\nRead-only Lakebase serving        Curated Genie Agent\n              ↘                  ↙\n                  Databricks App\n                        ↓\n         Lakebase-owned interventions\n                        ↓ CDC\n          Unity Catalog intervention Gold\n\nServing refreshes cannot overwrite advisor transactions."
+    "columns": [
+      "Governed intelligence",
+      "Lakeflow Bronze + Silver\nMLflow scoring\nUnity Catalog Gold",
+      "Unified experience",
+      "Databricks App\nRead-only Lakebase serving\nEmbedded Genie Agent",
+      "Closed feedback loop",
+      "Lakebase-owned interventions\nCDC to governed Gold\nServing cannot overwrite writes"
+    ]
   },
   {
     "layout": "cards_3col",
@@ -63,9 +70,14 @@
     ]
   },
   {
-    "layout": "content_basic",
+    "layout": "content_2col",
     "title": "Live demo: one coherent student-success story",
-    "body": "Replay the September 23 synthetic incident day\nInspect quality and feature freshness\nShow a medium-to-high risk transition\nReview the governed caseload and cited briefing\nRecord outreach and a follow-up\nVerify Lakebase CDC and intervention Gold\nView aggregate executive coverage\nAsk embedded Genie and inspect generated SQL"
+    "columns": [
+      "Signal → action",
+      "Replay the synthetic incident day\nInspect quality and feature freshness\nShow a medium-to-high risk transition\nReview the cited advisor briefing",
+      "Action → learning",
+      "Record outreach and follow-up\nVerify CDC and intervention Gold\nView aggregate executive coverage\nAsk embedded Genie and inspect its SQL"
+    ]
   },
   {
     "layout": "card_quad",
